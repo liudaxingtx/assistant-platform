@@ -8,7 +8,7 @@ app = FastAPI(title="AI Assistant Platform", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],  # dev mode — restrict in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

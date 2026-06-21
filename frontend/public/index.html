@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Assistant Platform</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#09090b;color:#fafafa;font-family:system-ui,-apple-system,sans-serif;min-height:100vh}
+.container{max-width:420px;margin:0 auto;padding:24px 16px}
+
+/* Login/Register */
+.auth-box{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.auth-card{width:100%;max-width:380px;background:#18181b;border:1px solid #27272a;border-radius:16px;padding:32px 24px}
+.auth-card h1{font-size:24px;font-weight:700;margin-bottom:4px}
+.auth-card .subtitle{color:#71717a;font-size:13px;margin-bottom:24px}
+.input-group{margin-bottom:16px}
+.input-group label{display:block;font-size:12px;color:#a1a1aa;margin-bottom:6px;font-weight:500}
+.input-group input{width:100%;padding:12px;border-radius:10px;border:1px solid #3f3f46;background:#09090b;color:#fff;font-size:14px;outline:none;transition:border-color .2s}
+.input-group input:focus{border-color:#a1a1aa}
+.btn{width:100%;padding:14px;border-radius:10px;border:none;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary{background:#fafafa;color:#09090b}
+.btn-primary:hover{background:#e4e4e7}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-danger{background:transparent;color:#71717a;font-size:13px;margin-top:8px}
+.btn-danger:hover{color:#fafafa}
+.link{color:#fafafa;text-decoration:underline;cursor:pointer;font-size:13px}
+.toggle-text{text-align:center;margin-top:16px;font-size:13px;color:#71717a}
+.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;padding:12px;border-radius:10px;font-size:13px;margin-bottom:16px;display:none}
+.error.show{display:block}
+
+/* Dashboard */
+.dashboard{display:none}
+.dashboard.show{display:block}
+.nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid #27272a;margin-bottom:24px}
+.nav h2{font-size:18px;font-weight:600}
+.nav .user-info{text-align:right}
+.nav .user-name{font-size:14px;font-weight:500}
+.nav .user-plan{font-size:11px;color:#71717a}
+
+.status-card{background:#18181b;border:1px solid #27272a;border-radius:12px;padding:20px;margin-bottom:16px}
+.status-card h3{font-size:13px;color:#71717a;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.status-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #27272a}
+.status-row:last-child{border-bottom:none}
+.status-label{font-size:13px;color:#a1a1aa}
+.status-value{font-size:13px;font-weight:500}
+.status-value.online{color:#22c55e}
+.status-value.pending{color:#eab308}
+.status-value.offline{color:#71717a}
+
+.quick-actions{margin-top:24px}
+.quick-actions h3{font-size:14px;margin-bottom:12px}
+.action-btn{display:block;width:100%;padding:14px;border-radius:10px;border:1px solid #27272a;background:#18181b;color:#fafafa;font-size:14px;text-align:left;cursor:pointer;transition:all .2s;margin-bottom:8px}
+.action-btn:hover{background:#27272a;border-color:#3f3f46}
+.action-btn .arrow{float:right;color:#71717a}
+
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid #71717a;border-top-color:#fafafa;border-radius:50%;animation:spin .6s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- LOGIN / REGISTER -->
+<div id="auth" class="auth-box">
+  <div class="auth-card">
+    <h1>AI Assistant</h1>
+    <p class="subtitle">Your personal AI, always on.</p>
+    <div id="error" class="error"></div>
+    <form id="auth-form">
+      <div id="name-group" class="input-group hidden">
+        <label>Full name</label>
+        <input id="name" type="text" placeholder="Your name">
+      </div>
+      <div class="input-group">
+        <label>Email address</label>
+        <input id="email" type="email" placeholder="you@example.com" required>
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input id="password" type="password" placeholder="Your password" required minlength="6">
+      </div>
+      <button id="submit-btn" type="submit" class="btn btn-primary">Sign In</button>
+    </form>
+    <p class="toggle-text">
+      <span id="toggle-label">Don't have an account?</span>
+      <a id="toggle-link" class="link" href="#">Create one</a>
+    </p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="dashboard container">
+  <div class="nav">
+    <h2>AI Assistant</h2>
+    <div class="user-info">
+      <div id="user-name" class="user-name"></div>
+      <div id="user-plan" class="user-plan"></div>
+    </div>
+  </div>
+
+  <div class="status-card">
+    <h3>Assistant Status</h3>
+    <div class="status-row">
+      <span class="status-label">Gateway</span>
+      <span id="gateway-status" class="status-value pending">Pending</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">WhatsApp</span>
+      <span id="whatsapp-status" class="status-value offline">Not configured</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Profile</span>
+      <span id="profile-status" class="status-value offline">Not set up</span>
+    </div>
+  </div>
+
+  <div class="quick-actions">
+    <h3>Quick Actions</h3>
+    <button class="action-btn" onclick="alert('Coming soon')">📧 Connect Email <span class="arrow">→</span></button>
+    <button class="action-btn" onclick="alert('Coming soon')">📅 Connect Calendar <span class="arrow">→</span></button>
+    <button class="action-btn" onclick="alert('Coming soon')">🎭 Customize Personality <span class="arrow">→</span></button>
+  </div>
+
+  <button id="logout-btn" class="btn btn-danger" style="margin-top:24px">Sign Out</button>
+</div>
+
+<script>
+const API = location.hostname === 'localhost' 
+  ? 'http://localhost:8000' 
+  : 'http://' + location.hostname + ':8000';
+
+let isRegister = false;
+
+// Toggle login/register
+document.getElementById('toggle-link').onclick = function(e) {
+  e.preventDefault();
+  isRegister = !isRegister;
+  document.getElementById('name-group').classList.toggle('hidden', !isRegister);
+  document.getElementById('submit-btn').textContent = isRegister ? 'Create Account' : 'Sign In';
+  document.getElementById('toggle-label').textContent = isRegister ? 'Already have an account?' : "Don't have an account?";
+  this.textContent = isRegister ? 'Sign in' : 'Create one';
+  hideError();
+};
+
+// Form submit
+document.getElementById('auth-form').onsubmit = async function(e) {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const name = document.getElementById('name').value.trim();
+  
+  if (!email || !password) return showError('Please fill in all fields');
+  if (isRegister && !name) return showError('Please enter your name');
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Please wait...';
+
+  try {
+    const endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
+    const body = isRegister ? { email, password, name } : { email, password };
+    const res = await fetch(API + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Request failed');
+    
+    localStorage.setItem('token', data.access_token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    showDashboard(data.user);
+  } catch (err) {
+    showError(err.message);
+    btn.disabled = false;
+    btn.textContent = isRegister ? 'Create Account' : 'Sign In';
+  }
+};
+
+// Logout
+document.getElementById('logout-btn').onclick = function() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  document.getElementById('auth').style.display = 'flex';
+  document.getElementById('dashboard').classList.remove('show');
+  document.getElementById('email').value = '';
+  document.getElementById('password').value = '';
+  isRegister = false;
+  document.getElementById('name-group').classList.add('hidden');
+  document.getElementById('submit-btn').textContent = 'Sign In';
+  document.getElementById('toggle-label').textContent = "Don't have an account?";
+  document.getElementById('toggle-link').textContent = 'Create one';
+};
+
+function showDashboard(user) {
+  document.getElementById('auth').style.display = 'none';
+  document.getElementById('dashboard').classList.add('show');
+  document.getElementById('user-name').textContent = user.name;
+  document.getElementById('user-plan').textContent = 'Starter Plan';
+  
+  // Fetch profile
+  fetch(API + '/api/profiles/me', {
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+  }).then(r => r.json()).then(p => {
+    if (p.gateway_status) {
+      document.getElementById('gateway-status').textContent = p.gateway_status;
+      document.getElementById('gateway-status').className = 'status-value ' + p.gateway_status;
+    }
+    if (p.profile_name) {
+      document.getElementById('profile-status').textContent = p.profile_name;
+      document.getElementById('profile-status').className = 'status-value online';
+    }
+  }).catch(() => {});
+}
+
+function showError(msg) {
+  const el = document.getElementById('error');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideError() {
+  document.getElementById('error').classList.remove('show');
+}
+
+// Auto-login if token exists
+(function() {
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  if (token && user) {
+    // Verify token still valid
+    fetch(API + '/api/auth/me', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    }).then(r => {
+      if (r.ok) showDashboard(user);
+      else { localStorage.clear(); }
+    });
+  }
+})();
+</script>
+</body>
+</html>
