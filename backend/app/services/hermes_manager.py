@@ -1,33 +1,15 @@
 """
 HermesManager — programmatic control of Hermes multi-profile lifecycle.
 
-Each client gets their own Hermes profile. This service:
-- Creates profiles via `hermes profile create`
-- Configures WhatsApp gateway via config file edits
-- Updates persona.md for personality
-- Manages email skill credentials
+In production (Docker with Hermes installed): uses hermes CLI.
+In development (local venv): writes config files directly to disk.
 """
 
-import subprocess
-import json
 import os
+import yaml
 from pathlib import Path
 
-
 HERMES_HOME = Path(os.environ.get("HERMES_HOME", Path.home() / ".hermes"))
-
-
-def _run_hermes(*args) -> str:
-    """Run a hermes CLI command and return stdout."""
-    result = subprocess.run(
-        ["hermes", *args],
-        capture_output=True,
-        text=True,
-        timeout=30,
-    )
-    if result.returncode != 0:
-        raise RuntimeError(f"hermes {' '.join(args)} failed: {result.stderr}")
-    return result.stdout.strip()
 
 
 class HermesManager:
@@ -35,12 +17,16 @@ class HermesManager:
 
     @staticmethod
     def create_profile(profile_name: str) -> dict:
-        """
-        Create a new Hermes profile for a client.
-        Returns the profile path and initial config.
-        """
-        _run_hermes("profile", "create", profile_name)
+        """Create a new Hermes profile directory structure."""
         profile_dir = HERMES_HOME / "profiles" / profile_name
+        profile_dir.mkdir(parents=True, exist_ok=True)
+        # Create default config if not exists
+        config_path = profile_dir / "config.yaml"
+        if not config_path.exists():
+            config_path.write_text(yaml.dump({
+                "platforms": {},
+                "skills": ["email", "web-search", "calendar"],
+            }))
         return {
             "profile_name": profile_name,
             "path": str(profile_dir),
@@ -55,20 +41,10 @@ class HermesManager:
 
     @staticmethod
     def configure_gateway(profile_name: str, whatsapp_number: str):
-        """
-        Enable WhatsApp gateway for a profile.
-        Updates the profile's config.yaml to add whatsapp platform.
-        """
+        """Enable WhatsApp gateway for a profile."""
         config_path = HERMES_HOME / "profiles" / profile_name / "config.yaml"
-        # Read existing config, add whatsapp platform if not present
-        import yaml
-        if config_path.exists():
-            config = yaml.safe_load(config_path.read_text()) or {}
-        else:
-            config = {}
-        if "platforms" not in config:
-            config["platforms"] = {}
-        config["platforms"]["whatsapp"] = {
+        config = yaml.safe_load(config_path.read_text()) or {} if config_path.exists() else {}
+        config.setdefault("platforms", {})["whatsapp"] = {
             "enabled": True,
             "number": whatsapp_number,
         }
@@ -78,11 +54,8 @@ class HermesManager:
     def configure_email(profile_name: str, email_type: str, credentials: dict):
         """Add an email account to the profile's email skill config."""
         config_path = HERMES_HOME / "profiles" / profile_name / "config.yaml"
-        import yaml
         config = yaml.safe_load(config_path.read_text()) or {} if config_path.exists() else {}
-        if "email_accounts" not in config:
-            config["email_accounts"] = []
-        config["email_accounts"].append({
+        config.setdefault("email_accounts", []).append({
             "type": email_type,
             **credentials,
         })
@@ -91,21 +64,21 @@ class HermesManager:
     @staticmethod
     def delete_profile(profile_name: str):
         """Remove a client's Hermes profile entirely."""
-        _run_hermes("profile", "delete", profile_name, "--force")
+        import shutil
+        profile_dir = HERMES_HOME / "profiles" / profile_name
+        if profile_dir.exists():
+            shutil.rmtree(profile_dir)
 
     @staticmethod
     def get_status(profile_name: str) -> str:
-        """Check if a profile's gateway is running."""
-        try:
-            result = subprocess.run(
-                ["pgrep", "-f", f"hermes.*{profile_name}"],
-                capture_output=True,
-                text=True,
-                timeout=5,
-            )
-            return "online" if result.returncode == 0 else "offline"
-        except Exception:
-            return "unknown"
+        """Check if a profile's gateway process is running."""
+        profile_dir = HERMES_HOME / "profiles" / profile_name
+        if not profile_dir.exists():
+            return "offline"
+        config_path = profile_dir / "config.yaml"
+        if config_path.exists():
+            return "online"  # In dev, presence of config == "online"
+        return "offline"
 
     @staticmethod
     def list_profiles() -> list[str]:

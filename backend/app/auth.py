@@ -1,6 +1,7 @@
+import hashlib
+import os
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,16 +10,21 @@ from app.database import get_db
 from app.config import settings
 from app.models import User
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    salt = os.urandom(32)
+    key = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 600000)
+    return salt.hex() + ":" + key.hex()
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    salt_hex, key_hex = hashed.split(":")
+    salt = bytes.fromhex(salt_hex)
+    key = bytes.fromhex(key_hex)
+    new_key = hashlib.pbkdf2_hmac("sha256", plain.encode(), salt, 600000)
+    return new_key == key
 
 
 def create_access_token(user_id: str) -> str:

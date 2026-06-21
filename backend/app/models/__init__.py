@@ -7,11 +7,14 @@ One user has one subscription and one Hermes profile.
 
 import uuid
 from datetime import datetime
+import uuid as _uuid
 from sqlalchemy import Column, String, DateTime, Enum as SAEnum, ForeignKey, JSON
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, relationship
 import enum
 
+# Use Text for UUIDs — compatible with both SQLite and PostgreSQL
+def _new_uuid():
+    return str(_uuid.uuid4())
 
 class Base(DeclarativeBase):
     pass
@@ -46,7 +49,7 @@ class ProfileStatus(str, enum.Enum):
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String(36), primary_key=True, default=_new_uuid)
     email = Column(String(255), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
     name = Column(String(255), nullable=False)
@@ -60,8 +63,8 @@ class User(Base):
 class Subscription(Base):
     __tablename__ = "subscriptions"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), unique=True, nullable=False)
+    id = Column(String(36), primary_key=True, default=_new_uuid)
+    user_id = Column(String(36), ForeignKey("users.id"), unique=True, nullable=False)
     plan = Column(SAEnum(Plan), default=Plan.STARTER, nullable=False)
     status = Column(SAEnum(SubscriptionStatus), default=SubscriptionStatus.TRIALING, nullable=False)
     stripe_subscription_id = Column(String(255), nullable=True)
@@ -75,8 +78,8 @@ class Subscription(Base):
 class HermesProfile(Base):
     __tablename__ = "hermes_profiles"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), unique=True, nullable=False)
+    id = Column(String(36), primary_key=True, default=_new_uuid)
+    user_id = Column(String(36), ForeignKey("users.id"), unique=True, nullable=False)
     profile_name = Column(String(64), unique=True, nullable=False)  # hermes profile name on disk
     whatsapp_number = Column(String(30), nullable=True)
     gateway_status = Column(SAEnum(ProfileStatus), default=ProfileStatus.PENDING, nullable=False)

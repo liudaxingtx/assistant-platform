@@ -104,7 +104,7 @@ async def create_client(
     db.add(sub)
 
     # 3. Create Hermes Profile on disk + DB
-    profile_name = f"client-{user.id.hex[:8]}"
+    profile_name = f"client-{user.id.replace('-','')[:8]}"
     profile = HermesProfile(
         user_id=user.id,
         profile_name=profile_name,

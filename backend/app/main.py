@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import engine, Base
+from app.database import engine
+from app.models import Base
 from app.api import auth, profiles, admin, billing
 
 app = FastAPI(title="AI Assistant Platform", version="0.1.0")

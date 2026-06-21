@@ -1,7 +1,12 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from app.config import settings
 
-engine = create_async_engine(settings.database_url, echo=False)
+# SQLite needs check_same_thread=False, PostgreSQL needs asyncpg
+connect_args = {}
+if settings.database_url.startswith("sqlite"):
+    connect_args["check_same_thread"] = False
+
+engine = create_async_engine(settings.database_url, echo=False, connect_args=connect_args)
 AsyncSession = async_sessionmaker(engine, expire_on_commit=False)
 
 
