@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel, EmailStr
 from app.database import get_db
-from app.models import User, UserStatus
+from app.models import User, HermesProfile, Subscription, UserStatus, ProfileStatus, SubscriptionStatus, Plan
 from app.auth import hash_password, verify_password, create_access_token, get_current_user
 
 router = APIRouter()
@@ -37,6 +37,23 @@ async def register(req: RegisterRequest, db: AsyncSession = Depends(get_db)):
         status=UserStatus.ACTIVE,
     )
     db.add(user)
+    await db.flush()
+
+    # Auto-create profile for new users
+    import uuid
+    profile_name = f"client-{user.id.replace('-','')[:8]}"
+    profile = HermesProfile(
+        user_id=user.id,
+        profile_name=profile_name,
+        gateway_status=ProfileStatus.PENDING,
+    )
+    sub = Subscription(
+        user_id=user.id,
+        plan=Plan.STARTER,
+        status=SubscriptionStatus.TRIALING,
+    )
+    db.add(profile)
+    db.add(sub)
     await db.commit()
     token = create_access_token(str(user.id))
     return TokenResponse(

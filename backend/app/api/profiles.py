@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.database import get_db
-from app.models import User, HermesProfile, ProfileStatus
+from app.models import User, HermesProfile, Subscription, ProfileStatus, SubscriptionStatus, Plan
 from app.auth import get_current_user
 from app.schemas import (
     ProfileResponse,
@@ -40,6 +40,22 @@ async def get_my_profile(
         email_accounts=profile.email_accounts or [],
         enabled_skills=profile.enabled_skills or [],
     )
+
+
+@router.put("/me/plan")
+async def update_plan(
+    req: dict,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    plan = req.get("plan", "starter")
+    result = await db.execute(select(Subscription).where(Subscription.user_id == user.id))
+    sub = result.scalar_one_or_none()
+    if not sub:
+        raise HTTPException(status_code=404, detail="No subscription")
+    sub.plan = Plan(plan)
+    await db.commit()
+    return {"status": "ok", "plan": plan}
 
 
 @router.put("/me/personality")
@@ -86,6 +102,28 @@ async def add_email(
         {"email": req.email_address, "app_password": req.app_password},
     )
     return {"status": "ok", "accounts": len(accounts)}
+
+
+@router.put("/me/whatsapp")
+async def update_whatsapp(
+    req: dict,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(HermesProfile).where(HermesProfile.user_id == user.id)
+    )
+    profile = result.scalar_one_or_none()
+    if not profile:
+        raise HTTPException(status_code=404, detail="No profile yet")
+    whatsapp_number = req.get("whatsapp_number", "").strip()
+    if not whatsapp_number:
+        raise HTTPException(status_code=400, detail="Phone number required")
+    profile.whatsapp_number = whatsapp_number
+    profile.gateway_status = ProfileStatus.PENDING
+    await db.commit()
+    HermesManager.configure_gateway(profile.profile_name, whatsapp_number)
+    return {"status": "ok", "whatsapp_number": whatsapp_number}
 
 
 @router.put("/me/skills")

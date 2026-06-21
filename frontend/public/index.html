@@ -7,21 +7,25 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#09090b;color:#fafafa;font-family:system-ui,-apple-system,sans-serif;min-height:100vh}
-.container{max-width:420px;margin:0 auto;padding:24px 16px}
+.page{display:none}
+.page.active{display:flex;flex-direction:column}
+.container{max-width:420px;margin:0 auto;padding:24px 16px;width:100%}
 
-/* Login/Register */
-.auth-box{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+/* Auth */
+.auth-box{min-height:100vh;align-items:center;justify-content:center;padding:16px}
 .auth-card{width:100%;max-width:380px;background:#18181b;border:1px solid #27272a;border-radius:16px;padding:32px 24px}
 .auth-card h1{font-size:24px;font-weight:700;margin-bottom:4px}
-.auth-card .subtitle{color:#71717a;font-size:13px;margin-bottom:24px}
+.subtitle{color:#71717a;font-size:13px;margin-bottom:24px}
 .input-group{margin-bottom:16px}
 .input-group label{display:block;font-size:12px;color:#a1a1aa;margin-bottom:6px;font-weight:500}
-.input-group input{width:100%;padding:12px;border-radius:10px;border:1px solid #3f3f46;background:#09090b;color:#fff;font-size:14px;outline:none;transition:border-color .2s}
+.input-group input, .input-group select{width:100%;padding:12px;border-radius:10px;border:1px solid #3f3f46;background:#09090b;color:#fff;font-size:14px;outline:none}
 .input-group input:focus{border-color:#a1a1aa}
 .btn{width:100%;padding:14px;border-radius:10px;border:none;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
 .btn-primary{background:#fafafa;color:#09090b}
 .btn-primary:hover{background:#e4e4e7}
 .btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-outline{background:transparent;border:1px solid #3f3f46;color:#a1a1aa;font-size:13px;padding:10px}
+.btn-outline:hover{border-color:#71717a;color:#fafafa}
 .btn-danger{background:transparent;color:#71717a;font-size:13px;margin-top:8px}
 .btn-danger:hover{color:#fafafa}
 .link{color:#fafafa;text-decoration:underline;cursor:pointer;font-size:13px}
@@ -29,17 +33,33 @@ body{background:#09090b;color:#fafafa;font-family:system-ui,-apple-system,sans-s
 .error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;padding:12px;border-radius:10px;font-size:13px;margin-bottom:16px;display:none}
 .error.show{display:block}
 
+/* Onboarding */
+#onboarding{min-height:100vh;align-items:center;justify-content:center;padding:16px}
+.onboard-card{width:100%;max-width:400px;background:#18181b;border:1px solid #27272a;border-radius:16px;padding:32px 24px}
+.steps{display:flex;gap:8px;margin-bottom:24px}
+.step-dot{flex:1;height:4px;background:#27272a;border-radius:2px}
+.step-dot.done{background:#22c55e}
+.step-dot.current{background:#fafafa}
+.step-label{text-align:center;font-size:11px;color:#71717a;margin-bottom:20px}
+
+/* Plan cards */
+.plans{display:flex;flex-direction:column;gap:12px;margin:16px 0}
+.plan-card{background:#09090b;border:2px solid #27272a;border-radius:12px;padding:16px;cursor:pointer;transition:all .2s}
+.plan-card:hover{border-color:#3f3f46}
+.plan-card.selected{border-color:#fafafa;background:#18181b}
+.plan-name{font-size:15px;font-weight:600;margin-bottom:4px}
+.plan-price{font-size:28px;font-weight:700;margin:8px 0}
+.plan-price span{font-size:13px;color:#71717a;font-weight:400}
+.plan-features{font-size:12px;color:#a1a1aa;line-height:1.6}
+
 /* Dashboard */
-.dashboard{display:none}
-.dashboard.show{display:block}
 .nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid #27272a;margin-bottom:24px}
 .nav h2{font-size:18px;font-weight:600}
-.nav .user-info{text-align:right}
 .nav .user-name{font-size:14px;font-weight:500}
 .nav .user-plan{font-size:11px;color:#71717a}
-
 .status-card{background:#18181b;border:1px solid #27272a;border-radius:12px;padding:20px;margin-bottom:16px}
 .status-card h3{font-size:13px;color:#71717a;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.status-card h4{font-size:12px;color:#71717a;margin-bottom:16px}
 .status-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #27272a}
 .status-row:last-child{border-bottom:none}
 .status-label{font-size:13px;color:#a1a1aa}
@@ -47,22 +67,24 @@ body{background:#09090b;color:#fafafa;font-family:system-ui,-apple-system,sans-s
 .status-value.online{color:#22c55e}
 .status-value.pending{color:#eab308}
 .status-value.offline{color:#71717a}
-
-.quick-actions{margin-top:24px}
-.quick-actions h3{font-size:14px;margin-bottom:12px}
 .action-btn{display:block;width:100%;padding:14px;border-radius:10px;border:1px solid #27272a;background:#18181b;color:#fafafa;font-size:14px;text-align:left;cursor:pointer;transition:all .2s;margin-bottom:8px}
-.action-btn:hover{background:#27272a;border-color:#3f3f46}
-.action-btn .arrow{float:right;color:#71717a}
-
+.action-btn:hover{background:#27272a}
+.msg{font-size:11px;margin-top:4px;display:none}
+.msg.show{display:block}
+.hidden{display:none!important}
 .spinner{display:inline-block;width:16px;height:16px;border:2px solid #71717a;border-top-color:#fafafa;border-radius:50%;animation:spin .6s linear infinite;margin-right:8px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
-.hidden{display:none!important}
+
+/* Stripe placeholder */
+.payment-box{text-align:center;padding:24px;background:#09090b;border:1px dashed #3f3f46;border-radius:12px;margin:16px 0}
+.payment-box .icon{font-size:48px;margin-bottom:12px}
+.payment-box p{font-size:13px;color:#a1a1aa;line-height:1.5}
 </style>
 </head>
 <body>
 
-<!-- LOGIN / REGISTER -->
-<div id="auth" class="auth-box">
+<!-- ====== LOGIN / REGISTER ====== -->
+<div id="auth" class="page auth-box active">
   <div class="auth-card">
     <h1>AI Assistant</h1>
     <p class="subtitle">Your personal AI, always on.</p>
@@ -70,15 +92,15 @@ body{background:#09090b;color:#fafafa;font-family:system-ui,-apple-system,sans-s
     <form id="auth-form">
       <div id="name-group" class="input-group hidden">
         <label>Full name</label>
-        <input id="name" type="text" placeholder="Your name">
+        <input id="reg-name" type="text" placeholder="Your name">
       </div>
       <div class="input-group">
         <label>Email address</label>
-        <input id="email" type="email" placeholder="you@example.com" required>
+        <input id="reg-email" type="email" placeholder="you@example.com" required>
       </div>
       <div class="input-group">
         <label>Password</label>
-        <input id="password" type="password" placeholder="Your password" required minlength="6">
+        <input id="reg-password" type="password" placeholder="Min 6 characters" required minlength="6">
       </div>
       <button id="submit-btn" type="submit" class="btn btn-primary">Sign In</button>
     </form>
@@ -89,16 +111,77 @@ body{background:#09090b;color:#fafafa;font-family:system-ui,-apple-system,sans-s
   </div>
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard" class="dashboard container">
+<!-- ====== ONBOARDING ====== -->
+<div id="onboarding" class="page">
+  <div class="onboard-card">
+    <div class="steps">
+      <div id="step1-dot" class="step-dot current"></div>
+      <div id="step2-dot" class="step-dot"></div>
+      <div id="step3-dot" class="step-dot"></div>
+    </div>
+    <div id="step-label" class="step-label">Step 1/3 — WhatsApp Setup</div>
+
+    <!-- Step 1: WhatsApp -->
+    <div id="step1-content">
+      <h2 style="font-size:18px;margin-bottom:8px">📱 Connect WhatsApp</h2>
+      <p style="font-size:13px;color:#71717a;margin-bottom:16px">Enter the phone number you want your AI assistant to use. This is how your assistant talks to you.</p>
+      <div class="input-group">
+        <label>WhatsApp phone number</label>
+        <input id="onboard-whatsapp" type="text" placeholder="+1 212 555 7890">
+      </div>
+      <button class="btn btn-primary" onclick="onboardSaveWhatsApp()" style="margin-top:8px">Continue →</button>
+      <button class="btn btn-outline" onclick="onboardSkip()" style="margin-top:8px">Skip for now</button>
+    </div>
+
+    <!-- Step 2: Plan -->
+    <div id="step2-content" class="hidden">
+      <h2 style="font-size:18px;margin-bottom:8px">💎 Choose Your Plan</h2>
+      <p style="font-size:13px;color:#71717a;margin-bottom:16px">All plans start with a 14-day free trial. No charge until trial ends.</p>
+      <div class="plans">
+        <div class="plan-card selected" data-plan="starter" onclick="selectPlan('starter')">
+          <div class="plan-name">🚀 Starter</div>
+          <div class="plan-price">$49<span>/month</span></div>
+          <div class="plan-features">✓ WhatsApp AI assistant<br>✓ Email management<br>✓ Basic scheduling</div>
+        </div>
+        <div class="plan-card" data-plan="pro" onclick="selectPlan('pro')">
+          <div class="plan-name">⭐ Pro</div>
+          <div class="plan-price">$149<span>/month</span></div>
+          <div class="plan-features">✓ Everything in Starter<br>✓ Calendar integration<br>✓ Advanced research<br>✓ Priority support</div>
+        </div>
+        <div class="plan-card" data-plan="enterprise" onclick="selectPlan('enterprise')">
+          <div class="plan-name">🏢 Enterprise</div>
+          <div class="plan-price">$499<span>/month</span></div>
+          <div class="plan-features">✓ Everything in Pro<br>✓ Multiple assistants<br>✓ Custom integrations<br>✓ Dedicated account manager</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="onboardSelectPlan()">Continue →</button>
+    </div>
+
+    <!-- Step 3: Payment -->
+    <div id="step3-content" class="hidden">
+      <h2 style="font-size:18px;margin-bottom:8px">💳 Secure Payment</h2>
+      <p style="font-size:13px;color:#71717a;margin-bottom:16px">Your card won't be charged until the 14-day trial ends.</p>
+      <div class="payment-box">
+        <div class="icon">🔒</div>
+        <p style="font-weight:600;margin-bottom:4px" id="payment-plan-name">Starter Plan · $49/mo</p>
+        <p>Stripe payment coming soon.<br>You're on a 14-day free trial — no card needed right now.</p>
+        <p style="margin-top:12px;font-size:11px;color:#555">Cancel anytime. No questions asked.</p>
+      </div>
+      <button class="btn btn-primary" onclick="onboardStartTrial()">Start Free Trial →</button>
+      <button class="btn btn-outline" onclick="onboardSkip()" style="margin-top:8px">Skip payment for now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== DASHBOARD ====== -->
+<div id="dashboard" class="page container">
   <div class="nav">
     <h2>AI Assistant</h2>
-    <div class="user-info">
+    <div style="text-align:right">
       <div id="user-name" class="user-name"></div>
       <div id="user-plan" class="user-plan"></div>
     </div>
   </div>
-
   <div class="status-card">
     <h3>Assistant Status</h3>
     <div class="status-row">
@@ -107,49 +190,51 @@ body{background:#09090b;color:#fafafa;font-family:system-ui,-apple-system,sans-s
     </div>
     <div class="status-row">
       <span class="status-label">WhatsApp</span>
-      <span id="whatsapp-status" class="status-value offline">Not configured</span>
+      <span id="whatsapp-display" class="status-value offline">Not configured</span>
+      <button id="edit-whatsapp-btn" class="btn-outline" style="width:auto;padding:4px 10px;font-size:11px" onclick="showWhatsAppEdit()">Edit</button>
     </div>
-    <div class="status-row">
-      <span class="status-label">Profile</span>
-      <span id="profile-status" class="status-value offline">Not set up</span>
+    <div id="whatsapp-editor" class="hidden" style="margin-top:8px">
+      <input id="whatsapp-input" type="text" placeholder="+1 555 123 4567" style="width:100%;padding:10px;border-radius:8px;border:1px solid #3f3f46;background:#09090b;color:#fff;font-size:13px;margin-bottom:6px">
+      <div style="display:flex;gap:6px">
+        <button class="btn" style="width:auto;padding:8px 16px;font-size:12px;background:#fafafa;color:#09090b;border:none;border-radius:8px" onclick="saveWhatsApp()">Save</button>
+        <button class="btn btn-outline" style="width:auto;padding:8px 16px;font-size:12px" onclick="document.getElementById('whatsapp-editor').classList.add('hidden')">Cancel</button>
+      </div>
+      <div id="whatsapp-msg" class="msg"></div>
+    </div>
+    <div class="status-row" style="border-bottom:none">
+      <span class="status-label">Plan</span>
+      <span id="plan-display" class="status-value online">Starter · Trial</span>
     </div>
   </div>
-
-  <div class="quick-actions">
-    <h3>Quick Actions</h3>
-    <button class="action-btn" onclick="alert('Coming soon')">📧 Connect Email <span class="arrow">→</span></button>
-    <button class="action-btn" onclick="alert('Coming soon')">📅 Connect Calendar <span class="arrow">→</span></button>
-    <button class="action-btn" onclick="alert('Coming soon')">🎭 Customize Personality <span class="arrow">→</span></button>
+  <div style="margin-top:24px">
+    <h3 style="font-size:14px;margin-bottom:12px">Quick Actions</h3>
+    <button class="action-btn" onclick="alert('Coming soon')">📧 Connect Email →</button>
+    <button class="action-btn" onclick="alert('Coming soon')">📅 Connect Calendar →</button>
+    <button class="action-btn" onclick="alert('Coming soon')">🎭 Customize Personality →</button>
   </div>
-
-  <button id="logout-btn" class="btn btn-danger" style="margin-top:24px">Sign Out</button>
+  <button id="logout-btn" class="btn btn-danger" style="margin-top:32px">Sign Out</button>
 </div>
 
 <script>
-const API = location.hostname === 'localhost' 
-  ? 'http://localhost:8000' 
-  : 'http://' + location.hostname + ':8000';
+const API = location.hostname === 'localhost' ? 'http://localhost:8000' : 'http://' + location.hostname + ':8000';
 
+// ====== AUTH ======
 let isRegister = false;
-
-// Toggle login/register
-document.getElementById('toggle-link').onclick = function(e) {
+document.getElementById('toggle-link').onclick = e => {
   e.preventDefault();
   isRegister = !isRegister;
   document.getElementById('name-group').classList.toggle('hidden', !isRegister);
   document.getElementById('submit-btn').textContent = isRegister ? 'Create Account' : 'Sign In';
   document.getElementById('toggle-label').textContent = isRegister ? 'Already have an account?' : "Don't have an account?";
-  this.textContent = isRegister ? 'Sign in' : 'Create one';
+  e.target.textContent = isRegister ? 'Sign in' : 'Create one';
   hideError();
 };
 
-// Form submit
 document.getElementById('auth-form').onsubmit = async function(e) {
   e.preventDefault();
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-  const name = document.getElementById('name').value.trim();
-  
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const name = document.getElementById('reg-name').value.trim();
   if (!email || !password) return showError('Please fill in all fields');
   if (isRegister && !name) return showError('Please enter your name');
 
@@ -160,17 +245,13 @@ document.getElementById('auth-form').onsubmit = async function(e) {
   try {
     const endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
     const body = isRegister ? { email, password, name } : { email, password };
-    const res = await fetch(API + endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
+    const res = await fetch(API + endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Request failed');
-    
     localStorage.setItem('token', data.access_token);
     localStorage.setItem('user', JSON.stringify(data.user));
-    showDashboard(data.user);
+    if (isRegister) showOnboarding();
+    else showDashboard(data.user);
   } catch (err) {
     showError(err.message);
     btn.disabled = false;
@@ -178,14 +259,110 @@ document.getElementById('auth-form').onsubmit = async function(e) {
   }
 };
 
+// ====== ONBOARDING ======
+let onboardPlan = 'starter';
+let onboardStep = 0;
+
+function showOnboarding() {
+  showPage('onboarding');
+  onboardStep = 0;
+  onboardPlan = 'starter';
+  updateStepUI();
+}
+
+function updateStepUI() {
+  ['step1','step2','step3'].forEach((s,i) => {
+    document.getElementById(s+'-dot').className = 'step-dot ' + (i < onboardStep ? 'done' : i === onboardStep ? 'current' : '');
+    document.getElementById(s+'-content').classList.toggle('hidden', i !== onboardStep);
+  });
+  const labels = ['Step 1/3 — WhatsApp Setup','Step 2/3 — Choose Plan','Step 3/3 — Payment'];
+  document.getElementById('step-label').textContent = labels[onboardStep];
+}
+
+function onboardSaveWhatsApp() {
+  const num = document.getElementById('onboard-whatsapp').value.trim();
+  if (num) {
+    fetch(API + '/api/profiles/me/whatsapp', {
+      method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('token')},
+      body:JSON.stringify({whatsapp_number:num})
+    }).catch(() => {});
+  }
+  onboardStep = 1; updateStepUI();
+}
+
+function onboardSkip() {
+  onboardStep++;
+  if (onboardStep >= 3) onboardFinish();
+  else updateStepUI();
+}
+
+function selectPlan(plan) {
+  onboardPlan = plan;
+  document.querySelectorAll('.plan-card').forEach(c => c.classList.toggle('selected', c.dataset.plan === plan));
+}
+
+function onboardSelectPlan() {
+  // Save plan to backend
+  fetch(API + '/api/profiles/me/plan', {
+    method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('token')},
+    body:JSON.stringify({plan:onboardPlan})
+  }).catch(() => {});
+  document.getElementById('payment-plan-name').textContent = 
+    onboardPlan === 'starter' ? 'Starter Plan · $49/mo' : 
+    onboardPlan === 'pro' ? 'Pro Plan · $149/mo' : 'Enterprise Plan · $499/mo';
+  onboardStep = 2; updateStepUI();
+}
+
+function onboardStartTrial() { onboardFinish(); }
+
+function onboardFinish() {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  showDashboard(user);
+}
+
+// ====== DASHBOARD ======
+function showDashboard(user) {
+  showPage('dashboard');
+  document.getElementById('user-name').textContent = user.name || '';
+  document.getElementById('user-plan').textContent = 'Starter · Trial';
+  
+  fetch(API + '/api/profiles/me', {
+    headers:{'Authorization':'Bearer '+localStorage.getItem('token')}
+  }).then(r => r.json()).then(p => {
+    if (p.gateway_status) { document.getElementById('gateway-status').textContent = p.gateway_status; document.getElementById('gateway-status').className = 'status-value '+p.gateway_status; }
+    if (p.whatsapp_number) { document.getElementById('whatsapp-display').textContent = p.whatsapp_number; document.getElementById('whatsapp-display').className = 'status-value online'; document.getElementById('whatsapp-input').value = p.whatsapp_number; }
+    if (p.plan) { document.getElementById('plan-display').textContent = p.plan+' · Trial'; }
+    document.getElementById('gateway-status').textContent = p.gateway_status || 'pending';
+    document.getElementById('gateway-status').className = 'status-value ' + (p.gateway_status || 'pending');
+  }).catch(() => {});
+}
+
+function showWhatsAppEdit() { document.getElementById('whatsapp-editor').classList.remove('hidden'); }
+async function saveWhatsApp() {
+  const number = document.getElementById('whatsapp-input').value.trim();
+  if (!number) return;
+  const msg = document.getElementById('whatsapp-msg');
+  try {
+    const res = await fetch(API + '/api/profiles/me/whatsapp', {
+      method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('token')},
+      body:JSON.stringify({whatsapp_number:number})
+    });
+    if (!res.ok) throw new Error('Failed');
+    document.getElementById('whatsapp-display').textContent = number;
+    document.getElementById('whatsapp-display').className = 'status-value online';
+    msg.textContent = '✓ Saved!'; msg.style.color='#22c55e'; msg.classList.add('show');
+    setTimeout(() => { msg.classList.remove('show'); document.getElementById('whatsapp-editor').classList.add('hidden'); }, 1500);
+  } catch(e) {
+    msg.textContent = e.message; msg.style.color='#f87171'; msg.classList.add('show');
+  }
+}
+
 // Logout
-document.getElementById('logout-btn').onclick = function() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  document.getElementById('auth').style.display = 'flex';
-  document.getElementById('dashboard').classList.remove('show');
-  document.getElementById('email').value = '';
-  document.getElementById('password').value = '';
+document.getElementById('logout-btn').onclick = () => {
+  localStorage.clear();
+  showPage('auth');
+  document.getElementById('reg-email').value = '';
+  document.getElementById('reg-password').value = '';
   isRegister = false;
   document.getElementById('name-group').classList.add('hidden');
   document.getElementById('submit-btn').textContent = 'Sign In';
@@ -193,48 +370,18 @@ document.getElementById('logout-btn').onclick = function() {
   document.getElementById('toggle-link').textContent = 'Create one';
 };
 
-function showDashboard(user) {
-  document.getElementById('auth').style.display = 'none';
-  document.getElementById('dashboard').classList.add('show');
-  document.getElementById('user-name').textContent = user.name;
-  document.getElementById('user-plan').textContent = 'Starter Plan';
-  
-  // Fetch profile
-  fetch(API + '/api/profiles/me', {
-    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-  }).then(r => r.json()).then(p => {
-    if (p.gateway_status) {
-      document.getElementById('gateway-status').textContent = p.gateway_status;
-      document.getElementById('gateway-status').className = 'status-value ' + p.gateway_status;
-    }
-    if (p.profile_name) {
-      document.getElementById('profile-status').textContent = p.profile_name;
-      document.getElementById('profile-status').className = 'status-value online';
-    }
-  }).catch(() => {});
-}
+// ====== HELPERS ======
+function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function showError(msg) { const el = document.getElementById('error'); el.textContent = msg; el.classList.add('show'); }
+function hideError() { document.getElementById('error').classList.remove('show'); }
 
-function showError(msg) {
-  const el = document.getElementById('error');
-  el.textContent = msg;
-  el.classList.add('show');
-}
-function hideError() {
-  document.getElementById('error').classList.remove('show');
-}
-
-// Auto-login if token exists
+// Auto-login
 (function() {
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || 'null');
   if (token && user) {
-    // Verify token still valid
-    fetch(API + '/api/auth/me', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    }).then(r => {
-      if (r.ok) showDashboard(user);
-      else { localStorage.clear(); }
-    });
+    fetch(API + '/api/auth/me', { headers:{'Authorization':'Bearer '+token} })
+      .then(r => r.ok ? showDashboard(user) : localStorage.clear());
   }
 })();
 </script>
