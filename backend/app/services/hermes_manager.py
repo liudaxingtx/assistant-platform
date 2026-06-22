@@ -43,7 +43,11 @@ class HermesManager:
     def configure_gateway(profile_name: str, whatsapp_number: str):
         """Enable WhatsApp gateway for a profile."""
         config_path = HERMES_HOME / "profiles" / profile_name / "config.yaml"
-        config = yaml.safe_load(config_path.read_text()) or {} if config_path.exists() else {}
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        if config_path.exists():
+            config = yaml.safe_load(config_path.read_text()) or {}
+        else:
+            config = {}
         config.setdefault("platforms", {})["whatsapp"] = {
             "enabled": True,
             "number": whatsapp_number,
@@ -54,7 +58,11 @@ class HermesManager:
     def configure_email(profile_name: str, email_type: str, credentials: dict):
         """Add an email account to the profile's email skill config."""
         config_path = HERMES_HOME / "profiles" / profile_name / "config.yaml"
-        config = yaml.safe_load(config_path.read_text()) or {} if config_path.exists() else {}
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        if config_path.exists():
+            config = yaml.safe_load(config_path.read_text()) or {}
+        else:
+            config = {}
         config.setdefault("email_accounts", []).append({
             "type": email_type,
             **credentials,
