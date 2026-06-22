@@ -11,11 +11,23 @@ from app.schemas import (
     UpdateSkillsRequest,
 )
 from app.services.hermes_manager import HermesManager
+from app.services.gateway_supervisor import GatewaySupervisor
 
 router = APIRouter()
 
 
-@router.get("/me", response_model=ProfileResponse)
+def _auto_restart_gateway(profile_name: str, profile_status_ref=None):
+    """After config change, restart the gateway if it was running.
+    Returns the new status string."""
+    try:
+        result = GatewaySupervisor.restart(profile_name)
+        new_status = result.get("start", {}).get("status", "offline")
+        return new_status
+    except Exception:
+        return "error"
+
+
+@router.get("/me")
 async def get_my_profile(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -26,20 +38,29 @@ async def get_my_profile(
     profile = result.scalar_one_or_none()
     if not profile:
         raise HTTPException(status_code=404, detail="No profile yet — contact support")
-    # Refresh gateway status from the actual process
-    actual_status = HermesManager.get_status(profile.profile_name)
+    
+    # Get real-time gateway status from supervisor
+    actual_status = GatewaySupervisor.status(profile.profile_name)
     if actual_status != profile.gateway_status.value:
         profile.gateway_status = ProfileStatus(actual_status)
         await db.commit()
-    return ProfileResponse(
-        id=str(profile.id),
-        profile_name=profile.profile_name,
-        whatsapp_number=profile.whatsapp_number,
-        gateway_status=actual_status,
-        personality=profile.personality,
-        email_accounts=profile.email_accounts or [],
-        enabled_skills=profile.enabled_skills or [],
+    
+    # Also get subscription info
+    sub_result = await db.execute(
+        select(Subscription).where(Subscription.user_id == user.id)
     )
+    sub = sub_result.scalar_one_or_none()
+    
+    return {
+        "id": str(profile.id),
+        "profile_name": profile.profile_name,
+        "whatsapp_number": profile.whatsapp_number,
+        "gateway_status": actual_status,
+        "personality": profile.personality,
+        "email_accounts": profile.email_accounts or [],
+        "enabled_skills": profile.enabled_skills or [],
+        "plan": sub.plan.value if sub else "starter",
+    }
 
 
 @router.put("/me/plan")
@@ -73,6 +94,10 @@ async def update_personality(
     profile.personality = req.personality
     await db.commit()
     HermesManager.configure_personality(profile.profile_name, req.personality)
+    
+    # Auto-restart gateway so new persona takes effect
+    _auto_restart_gateway(profile.profile_name)
+    
     return {"status": "ok"}
 
 
@@ -92,7 +117,7 @@ async def add_email(
     accounts.append({
         "type": req.email_type,
         "email": req.email_address,
-        "app_password": req.app_password,  # stored encrypted in production
+        "app_password": req.app_password,
     })
     profile.email_accounts = accounts
     await db.commit()
@@ -101,6 +126,10 @@ async def add_email(
         req.email_type,
         {"email": req.email_address, "app_password": req.app_password},
     )
+    
+    # Auto-restart gateway so new email account works
+    _auto_restart_gateway(profile.profile_name)
+    
     return {"status": "ok", "accounts": len(accounts)}
 
 
@@ -123,7 +152,13 @@ async def update_whatsapp(
     profile.gateway_status = ProfileStatus.PENDING
     await db.commit()
     HermesManager.configure_gateway(profile.profile_name, whatsapp_number)
-    return {"status": "ok", "whatsapp_number": whatsapp_number}
+    
+    # Auto-restart gateway with new WhatsApp config
+    new_status = _auto_restart_gateway(profile.profile_name)
+    profile.gateway_status = ProfileStatus(new_status) if new_status in ("online", "offline", "pending", "error") else ProfileStatus.ONLINE
+    await db.commit()
+    
+    return {"status": "ok", "whatsapp_number": whatsapp_number, "gateway_status": new_status}
 
 
 @router.delete("/me/email/{index}")
@@ -144,6 +179,10 @@ async def remove_email(
     accounts.pop(index)
     profile.email_accounts = accounts
     await db.commit()
+    
+    # Auto-restart gateway
+    _auto_restart_gateway(profile.profile_name)
+    
     return {"status": "ok", "accounts": len(accounts)}
 
 
@@ -161,4 +200,8 @@ async def update_skills(
         raise HTTPException(status_code=404, detail="No profile yet")
     profile.enabled_skills = req.skills
     await db.commit()
+    
+    # Auto-restart gateway
+    _auto_restart_gateway(profile.profile_name)
+    
     return {"status": "ok", "skills": req.skills}

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Admin — AI Assistant Platform</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#09090b;--surface:#18181b;--border:#27272a;--border-hover:#3f3f46;--text:#fafafa;--text-secondary:#a1a1aa;--text-tertiary:#71717a;--green:#22c55e;--yellow:#eab308;--red:#f87171}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;min-height:100dvh}
+.container{max-width:800px;margin:0 auto;padding:20px}
+.header{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--border);margin-bottom:20px;position:sticky;top:0;background:var(--bg);z-index:10}
+.header h1{font-size:20px}
+.stats{display:flex;gap:12px;margin-bottom:20px}
+.stat-card{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.stat-value{font-size:28px;font-weight:700}
+.stat-label{font-size:11px;color:var(--text-tertiary);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.section-title{font-size:15px;font-weight:600;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.client-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;transition:border .15s}
+.client-card:hover{border-color:var(--border-hover)}
+.client-card.expanded{border-color:var(--text-secondary)}
+.client-top{display:flex;justify-content:space-between;align-items:center}
+.client-name{font-size:15px;font-weight:600;margin-bottom:2px}
+.client-email{font-size:12px;color:var(--text-tertiary)}
+.client-meta{display:flex;gap:8px;align-items:center}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600}
+.badge-online{background:rgba(34,197,94,.15);color:var(--green)}
+.badge-offline{background:rgba(113,113,122,.15);color:var(--text-tertiary)}
+.badge-pending{background:rgba(234,179,8,.15);color:var(--yellow)}
+.badge-error{background:rgba(239,68,68,.15);color:var(--red)}
+.badge-active{background:rgba(34,197,94,.15);color:var(--green)}
+.badge-trial{background:rgba(250,250,250,.08);color:var(--text-secondary)}
+.client-detail{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.client-card.expanded .client-detail{display:block}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px}
+.detail-label{color:var(--text-tertiary)}
+.detail-value{font-weight:500}
+.btn{display:inline-block;padding:8px 14px;border-radius:8px;border:none;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;margin-right:6px;margin-bottom:4px}
+.btn-primary{background:var(--text);color:var(--bg)}
+.btn-primary:hover{opacity:.9}
+.btn-outline{background:transparent;border:1px solid var(--border-hover);color:var(--text)}
+.btn-outline:hover{border-color:var(--text-tertiary)}
+.btn-success{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.btn-danger{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.btn-lg{padding:12px 20px;font-size:14px;width:100%;text-align:center}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 24px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto}
+.modal h2{font-size:18px;margin-bottom:16px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;color:var(--text-secondary);margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.field input,.field select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border-hover);background:var(--bg);color:var(--text);font-size:14px;outline:none}
+.field input:focus{border-color:var(--text-secondary)}
+.msg{font-size:12px;margin-top:8px;display:none;padding:8px 12px;border-radius:8px}
+.msg.show{display:block}
+.msg-ok{background:rgba(34,197,94,.12);color:var(--green)}
+.msg-err{background:rgba(239,68,68,.12);color:var(--red)}
+.log-view{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:monospace;font-size:11px;color:var(--text-secondary);white-space:pre-wrap;max-height:200px;overflow-y:auto;line-height:1.5}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--text-tertiary);border-top-color:var(--text);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>⚙ Admin Panel</h1>
+      <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px">AI Assistant Platform</div>
+    </div>
+    <button class="btn btn-primary" onclick="showCreateModal()">+ New Client</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card"><div class="stat-value" id="stat-total">-</div><div class="stat-label">Total Clients</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-active">-</div><div class="stat-label">Active</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-gateways">-</div><div class="stat-label">Gateways Running</div></div>
+  </div>
+
+  <div class="section-title"><span>Clients</span><button class="btn btn-outline" onclick="refreshAll()">🔄 Refresh</button></div>
+  
+  <div id="client-list">
+    <div style="text-align:center;padding:40px;color:var(--text-tertiary)">Loading...</div>
+  </div>
+</div>
+
+<!-- Create Client Modal -->
+<div id="create-modal" class="modal-overlay">
+  <div class="modal">
+    <h2>🔧 Provision New Client</h2>
+    <div id="create-msg" class="msg"></div>
+    <div class="field">
+      <label>Client Name</label>
+      <input id="create-name" type="text" placeholder="Jane Smith">
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input id="create-email" type="email" placeholder="jane@example.com">
+    </div>
+    <div class="field">
+      <label>WhatsApp Number</label>
+      <input id="create-whatsapp" type="text" placeholder="+1 555 123 4567">
+    </div>
+    <div class="field">
+      <label>Plan</label>
+      <select id="create-plan">
+        <option value="starter">Starter ($49/mo)</option>
+        <option value="pro">Pro ($149/mo)</option>
+        <option value="enterprise">Enterprise ($499/mo)</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-lg" onclick="createClient()">Create & Provision</button>
+    <button class="btn btn-outline btn-lg" style="margin-top:8px" onclick="document.getElementById('create-modal').classList.remove('show')">Cancel</button>
+  </div>
+</div>
+
+<script>
+const API = location.hostname === 'localhost' ? 'http://localhost:8000' : 'http://' + location.hostname + ':8000';
+
+// Login as first user to get admin token
+let adminToken = null;
+async function ensureAuth() {
+  if (adminToken) return adminToken;
+  // Try to login as our admin user
+  const res = await fetch(API+'/api/auth/login', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email:'admin@platform.local',password:'admin123'})
+  }).catch(()=>null);
+  if (res && res.ok) {
+    const data = await res.json();
+    adminToken = data.access_token;
+    return adminToken;
+  }
+  // If no admin account, we'll use the first available token
+  // For dev: just list clients without auth for now
+  return 'dev';
+}
+
+async function api(method, path, body) {
+  const headers = {'Content-Type':'application/json'};
+  const token = await ensureAuth();
+  if (token && token !== 'dev') headers['Authorization'] = 'Bearer '+token;
+  const opts = {method, headers};
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API+path, opts);
+  return res.json();
+}
+
+function badge(status) {
+  const cls = 'badge badge-'+(status==='online'?'online':status==='offline'?'offline':status==='pending'?'pending':'error');
+  return `<span class="${cls}">${status}</span>`;
+}
+
+async function refreshAll() {
+  // Stats
+  try {
+    const stats = await api('GET','/api/admin/stats');
+    document.getElementById('stat-total').textContent = stats.total_clients;
+    document.getElementById('stat-active').textContent = stats.active_clients;
+    document.getElementById('stat-gateways').textContent = stats.running_gateways;
+  } catch(e) {}
+  
+  // Clients
+  try {
+    const clients = await api('GET','/api/admin/clients');
+    const list = document.getElementById('client-list');
+    if (!clients || clients.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-tertiary)">No clients yet. Create one!</div>';
+      return;
+    }
+    list.innerHTML = clients.map(c => `
+      <div class="client-card" id="client-${c.id}">
+        <div class="client-top" onclick="toggleClient('${c.id}')">
+          <div>
+            <div class="client-name">${c.name||'Unnamed'}</div>
+            <div class="client-email">${c.email}</div>
+          </div>
+          <div class="client-meta">
+            ${badge(c.gateway_status)}
+            <span class="badge badge-trial">${c.plan}</span>
+          </div>
+        </div>
+        <div class="client-detail">
+          <div class="detail-row"><span class="detail-label">Profile</span><span class="detail-value">${c.profile_name||'—'}</span></div>
+          <div class="detail-row"><span class="detail-label">WhatsApp</span><span class="detail-value">${c.whatsapp_number||'Not set'}</span></div>
+          <div class="detail-row"><span class="detail-label">Gateway</span><span class="detail-value">${badge(c.gateway_status)}</span></div>
+          <div class="detail-row"><span class="detail-label">Subscription</span><span class="detail-value"><span class="badge badge-active">${c.subscription_status}</span></span></div>
+          <div style="margin-top:10px">
+            <button class="btn btn-success" onclick="startGateway('${c.id}')">▶ Start</button>
+            <button class="btn btn-danger" onclick="stopGateway('${c.id}')">⏹ Stop</button>
+            <button class="btn btn-outline" onclick="restartGateway('${c.id}')">↻ Restart</button>
+            <button class="btn btn-outline" onclick="viewLog('${c.id}')">📄 Log</button>
+          </div>
+          <div id="log-${c.id}" class="log-view" style="display:none;margin-top:8px"></div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    document.getElementById('client-list').innerHTML = '<div style="text-align:center;padding:40px;color:var(--red)">Failed to load: '+e.message+'</div>';
+  }
+}
+
+function toggleClient(id) {
+  document.getElementById('client-'+id).classList.toggle('expanded');
+}
+
+async function startGateway(userId) {
+  const btn = event.target; btn.disabled = true; btn.textContent = '...';
+  try {
+    const r = await api('POST','/api/admin/clients/'+userId+'/gateway/start');
+    if (r.pid) alert('Gateway started! PID: '+r.pid);
+    else alert('Result: '+r.status+(r.detail?' — '+r.detail:''));
+  } catch(e) { alert('Error: '+e.message); }
+  btn.disabled = false; btn.textContent = '▶ Start';
+  refreshAll();
+}
+
+async function stopGateway(userId) {
+  const btn = event.target; btn.disabled = true; btn.textContent = '...';
+  try {
+    await api('POST','/api/admin/clients/'+userId+'/gateway/stop');
+  } catch(e) {}
+  btn.disabled = false; btn.textContent = '⏹ Stop';
+  refreshAll();
+}
+
+async function restartGateway(userId) {
+  const btn = event.target; btn.disabled = true; btn.textContent = '...';
+  try {
+    await api('POST','/api/admin/clients/'+userId+'/gateway/restart');
+  } catch(e) {}
+  btn.disabled = false; btn.textContent = '↻ Restart';
+  refreshAll();
+}
+
+async function viewLog(userId) {
+  const logDiv = document.getElementById('log-'+userId);
+  if (logDiv.style.display === 'block') { logDiv.style.display = 'none'; return; }
+  logDiv.style.display = 'block';
+  logDiv.textContent = 'Loading...';
+  try {
+    const r = await api('GET','/api/admin/clients/'+userId+'/gateway/log?tail=50');
+    logDiv.textContent = r.log || '(empty)';
+  } catch(e) { logDiv.textContent = 'Error: '+e.message; }
+}
+
+// ===== CREATE CLIENT =====
+function showCreateModal() {
+  document.getElementById('create-modal').classList.add('show');
+}
+async function createClient() {
+  const name = document.getElementById('create-name').value.trim();
+  const email = document.getElementById('create-email').value.trim();
+  const whatsapp = document.getElementById('create-whatsapp').value.trim();
+  const plan = document.getElementById('create-plan').value;
+  if (!name || !email) return;
+  
+  const msg = document.getElementById('create-msg');
+  const btn = event.target; btn.disabled = true; btn.textContent = 'Creating...';
+  
+  try {
+    const r = await api('POST','/api/admin/clients/create', {name,email,whatsapp_number:whatsapp,plan});
+    msg.className = 'msg msg-ok show';
+    msg.innerHTML = `<b>✓ Created!</b><br>
+      Profile: <code>${r.profile_name}</code><br>
+      Temp Password: <code style="background:var(--bg);padding:2px 6px;border-radius:4px">${r.temp_password}</code><br>
+      <small>Share this password with the client. They can change it later.</small>`;
+    document.getElementById('create-modal').classList.remove('show');
+    document.getElementById('create-name').value = '';
+    document.getElementById('create-email').value = '';
+    document.getElementById('create-whatsapp').value = '';
+    refreshAll();
+  } catch(e) {
+    msg.className = 'msg msg-err show';
+    msg.textContent = 'Error: '+(e.detail||e.message);
+  }
+  btn.disabled = false; btn.textContent = 'Create & Provision';
+}
+
+// Init
+refreshAll();
+setInterval(refreshAll, 15000); // auto-refresh every 15s
+</script>
+</body>
+</html>
