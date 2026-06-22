@@ -62,6 +62,25 @@ async def create_checkout(
     return {"url": checkout.url}
 
 
+@router.get("/subscription")
+async def get_subscription(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(Subscription).where(Subscription.user_id == user.id)
+    )
+    sub = result.scalar_one_or_none()
+    if not sub:
+        raise HTTPException(status_code=404, detail="No subscription")
+    return {
+        "plan": sub.plan.value,
+        "status": sub.status.value,
+        "period_end": str(sub.current_period_end) if sub.current_period_end else None,
+        "stripe_customer_id": sub.stripe_customer_id,
+    }
+
+
 @router.post("/webhook")
 async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     payload = await request.body()

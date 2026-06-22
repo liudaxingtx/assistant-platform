@@ -2,116 +2,169 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Assistant Platform</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>AI Assistant</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#09090b;color:#fafafa;font-family:system-ui,-apple-system,sans-serif;min-height:100vh}
+:root{--bg:#09090b;--surface:#18181b;--border:#27272a;--border-hover:#3f3f46;--text:#fafafa;--text-secondary:#a1a1aa;--text-tertiary:#71717a;--green:#22c55e;--yellow:#eab308;--red:#f87171;--accent:#fafafa}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;min-height:100dvh;-webkit-font-smoothing:antialiased}
 .page{display:none}
 .page.active{display:flex;flex-direction:column}
-.container{max-width:420px;margin:0 auto;padding:24px 16px;width:100%}
 
-/* Auth */
-.auth-box{min-height:100vh;align-items:center;justify-content:center;padding:16px}
-.auth-card{width:100%;max-width:380px;background:#18181b;border:1px solid #27272a;border-radius:16px;padding:32px 24px}
-.auth-card h1{font-size:24px;font-weight:700;margin-bottom:4px}
-.subtitle{color:#71717a;font-size:13px;margin-bottom:24px}
-.input-group{margin-bottom:16px}
-.input-group label{display:block;font-size:12px;color:#a1a1aa;margin-bottom:6px;font-weight:500}
-.input-group input, .input-group select{width:100%;padding:12px;border-radius:10px;border:1px solid #3f3f46;background:#09090b;color:#fff;font-size:14px;outline:none}
-.input-group input:focus{border-color:#a1a1aa}
-.btn{width:100%;padding:14px;border-radius:10px;border:none;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
-.btn-primary{background:#fafafa;color:#09090b}
-.btn-primary:hover{background:#e4e4e7}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed}
-.btn-outline{background:transparent;border:1px solid #3f3f46;color:#a1a1aa;font-size:13px;padding:10px}
-.btn-outline:hover{border-color:#71717a;color:#fafafa}
-.btn-danger{background:transparent;color:#71717a;font-size:13px;margin-top:8px}
-.btn-danger:hover{color:#fafafa}
-.link{color:#fafafa;text-decoration:underline;cursor:pointer;font-size:13px}
-.toggle-text{text-align:center;margin-top:16px;font-size:13px;color:#71717a}
-.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;padding:12px;border-radius:10px;font-size:13px;margin-bottom:16px;display:none}
-.error.show{display:block}
+/* ===== AUTH ===== */
+.auth-box{min-height:100dvh;align-items:center;justify-content:center;padding:20px}
+.auth-card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px 28px}
+.auth-card .logo{font-size:32px;margin-bottom:4px}
+.auth-card h1{font-size:22px;font-weight:700;margin-bottom:2px}
+.auth-card .sub{color:var(--text-tertiary);font-size:13px;margin-bottom:28px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;color:var(--text-secondary);margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border-hover);background:var(--bg);color:var(--text);font-size:14px;outline:none;transition:border .15s}
+.field input:focus,.field textarea:focus{border-color:var(--text-secondary)}
+.field textarea{resize:vertical;min-height:80px;font-family:inherit}
+.btn{display:block;width:100%;padding:14px;border-radius:10px;border:none;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;text-align:center}
+.btn-primary{background:var(--text);color:var(--bg)}
+.btn-primary:hover{opacity:.9}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-outline{background:transparent;border:1px solid var(--border-hover);color:var(--text);font-size:13px;padding:10px}
+.btn-outline:hover{border-color:var(--text-tertiary)}
+.btn-sm{padding:8px 14px;font-size:12px;width:auto;display:inline-block}
+.btn-danger{background:transparent;color:var(--text-tertiary);font-size:13px;padding:10px}
+.btn-danger:hover{color:var(--text)}
+.link{color:var(--text);text-decoration:underline;cursor:pointer;font-size:13px}
+.toggle-text{text-align:center;margin-top:16px;font-size:12px;color:var(--text-tertiary)}
+.error-msg{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);color:var(--red);padding:12px;border-radius:10px;font-size:12px;margin-bottom:16px;display:none}
+.error-msg.show{display:block}
+.success-msg{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.2);color:var(--green);padding:10px 12px;border-radius:8px;font-size:12px;margin-top:8px;display:none}
+.success-msg.show{display:block}
 
-/* Onboarding */
-#onboarding{min-height:100vh;align-items:center;justify-content:center;padding:16px}
-.onboard-card{width:100%;max-width:400px;background:#18181b;border:1px solid #27272a;border-radius:16px;padding:32px 24px}
-.steps{display:flex;gap:8px;margin-bottom:24px}
-.step-dot{flex:1;height:4px;background:#27272a;border-radius:2px}
-.step-dot.done{background:#22c55e}
-.step-dot.current{background:#fafafa}
-.step-label{text-align:center;font-size:11px;color:#71717a;margin-bottom:20px}
+/* ===== ONBOARDING ===== */
+#onboarding{min-height:100dvh;align-items:center;justify-content:center;padding:20px}
+.onboard-card{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px 24px}
+.steps{display:flex;gap:6px;margin-bottom:20px}
+.step-dot{flex:1;height:3px;background:var(--border);border-radius:2px}
+.step-dot.done{background:var(--green)}
+.step-dot.current{background:var(--text)}
+.step-label{text-align:center;font-size:11px;color:var(--text-tertiary);margin-bottom:20px;text-transform:uppercase;letter-spacing:.5px}
+.step-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.step-desc{font-size:13px;color:var(--text-tertiary);margin-bottom:20px;line-height:1.5}
+.plans{display:flex;flex-direction:column;gap:10px;margin:16px 0}
+.plan-card{background:var(--bg);border:2px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all .15s}
+.plan-card:hover{border-color:var(--border-hover)}
+.plan-card.selected{border-color:var(--text);background:var(--surface)}
+.plan-name{font-size:15px;font-weight:600;margin-bottom:2px}
+.plan-price{font-size:26px;font-weight:700;margin:6px 0}
+.plan-price span{font-size:12px;color:var(--text-tertiary);font-weight:400}
+.plan-feat{font-size:11px;color:var(--text-secondary);line-height:1.6}
+.payment-placeholder{text-align:center;padding:28px 20px;background:var(--bg);border:1px dashed var(--border-hover);border-radius:14px;margin:16px 0}
+.payment-placeholder .icon{font-size:40px;margin-bottom:10px}
+.payment-placeholder p{font-size:12px;color:var(--text-secondary);line-height:1.6}
 
-/* Plan cards */
-.plans{display:flex;flex-direction:column;gap:12px;margin:16px 0}
-.plan-card{background:#09090b;border:2px solid #27272a;border-radius:12px;padding:16px;cursor:pointer;transition:all .2s}
-.plan-card:hover{border-color:#3f3f46}
-.plan-card.selected{border-color:#fafafa;background:#18181b}
-.plan-name{font-size:15px;font-weight:600;margin-bottom:4px}
-.plan-price{font-size:28px;font-weight:700;margin:8px 0}
-.plan-price span{font-size:13px;color:#71717a;font-weight:400}
-.plan-features{font-size:12px;color:#a1a1aa;line-height:1.6}
+/* ===== MAIN APP ===== */
+.app-wrap{min-height:100dvh;display:flex;flex-direction:column;padding-bottom:72px}
+.header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:10}
+.header-left{display:flex;flex-direction:column}
+.header-logo{font-size:17px;font-weight:700}
+.header-sub{font-size:11px;color:var(--text-tertiary)}
+.header-actions{display:flex;gap:6px}
+.icon-btn{background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all .15s}
+.icon-btn:hover{border-color:var(--text-tertiary);color:var(--text)}
+.content{padding:20px;flex:1}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.card-header h3{font-size:13px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.card-title{font-size:15px;font-weight:600;margin-bottom:2px}
+.card-subtitle{font-size:12px;color:var(--text-tertiary);margin-bottom:12px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:none}
+.row-label{font-size:13px;color:var(--text-secondary)}
+.row-value{font-size:13px;font-weight:500}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-online{background:rgba(34,197,94,.15);color:var(--green)}
+.badge-pending{background:rgba(234,179,8,.15);color:var(--yellow)}
+.badge-offline{background:rgba(113,113,122,.15);color:var(--text-tertiary)}
+.badge-active{background:rgba(34,197,94,.15);color:var(--green)}
+.badge-trial{background:rgba(250,250,250,.1);color:var(--text-secondary)}
+.empty-state{text-align:center;padding:32px 16px;color:var(--text-tertiary);font-size:13px;line-height:1.6}
+.empty-state .empty-icon{font-size:36px;margin-bottom:10px}
+.empty-state p{color:var(--text-secondary)}
 
-/* Dashboard */
-.nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid #27272a;margin-bottom:24px}
-.nav h2{font-size:18px;font-weight:600}
-.nav .user-name{font-size:14px;font-weight:500}
-.nav .user-plan{font-size:11px;color:#71717a}
-.status-card{background:#18181b;border:1px solid #27272a;border-radius:12px;padding:20px;margin-bottom:16px}
-.status-card h3{font-size:13px;color:#71717a;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
-.status-card h4{font-size:12px;color:#71717a;margin-bottom:16px}
-.status-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #27272a}
-.status-row:last-child{border-bottom:none}
-.status-label{font-size:13px;color:#a1a1aa}
-.status-value{font-size:13px;font-weight:500}
-.status-value.online{color:#22c55e}
-.status-value.pending{color:#eab308}
-.status-value.offline{color:#71717a}
-.action-btn{display:block;width:100%;padding:14px;border-radius:10px;border:1px solid #27272a;background:#18181b;color:#fafafa;font-size:14px;text-align:left;cursor:pointer;transition:all .2s;margin-bottom:8px}
-.action-btn:hover{background:#27272a}
-.msg{font-size:11px;margin-top:4px;display:none}
-.msg.show{display:block}
-.hidden{display:none!important}
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid #71717a;border-top-color:#fafafa;border-radius:50%;animation:spin .6s linear infinite;margin-right:8px;vertical-align:middle}
+/* ===== BOTTOM NAV ===== */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0 env(safe-area-inset-bottom,8px);z-index:20}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 14px;background:none;border:none;color:var(--text-tertiary);cursor:pointer;transition:color .15s;font-size:10px;font-weight:500}
+.nav-item .nav-icon{font-size:20px;line-height:1}
+.nav-item.active{color:var(--text)}
+
+/* ===== SERVICES PAGE ===== */
+.service-section{margin-bottom:20px}
+.service-section h3{font-size:13px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;font-weight:600}
+.email-item{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-bottom:8px}
+.email-item .email-addr{font-size:13px;font-weight:500}
+.email-item .email-type{font-size:10px;color:var(--text-tertiary);text-transform:uppercase}
+.remove-btn{background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:14px;padding:4px 6px;border-radius:6px}
+.remove-btn:hover{color:var(--red)}
+
+/* ===== SKILLS ===== */
+.skill-toggle{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:border .15s}
+.skill-toggle:hover{border-color:var(--border-hover)}
+.skill-info{flex:1}
+.skill-name{font-size:13px;font-weight:500;margin-bottom:1px}
+.skill-desc{font-size:11px;color:var(--text-tertiary)}
+.toggle-switch{width:44px;height:26px;background:var(--border);border-radius:13px;position:relative;transition:background .2s}
+.toggle-switch.on{background:var(--green)}
+.toggle-switch::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;background:var(--text);border-radius:50%;transition:transform .2s}
+.toggle-switch.on::after{transform:translateX(18px)}
+
+/* ===== BILLING ===== */
+.plan-hero{text-align:center;padding:20px 16px}
+.plan-hero .current-plan{font-size:28px;font-weight:700;margin-bottom:4px}
+.plan-hero .price{font-size:36px;font-weight:700;margin:8px 0}
+.plan-hero .price span{font-size:14px;color:var(--text-tertiary)}
+.plan-hero .status-badge{margin-top:6px}
+.upgrade-options{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--text-tertiary);border-top-color:var(--text);border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
+.hidden{display:none!important}
+.section-title{font-size:17px;font-weight:700;margin-bottom:14px}
 
-/* Stripe placeholder */
-.payment-box{text-align:center;padding:24px;background:#09090b;border:1px dashed #3f3f46;border-radius:12px;margin:16px 0}
-.payment-box .icon{font-size:48px;margin-bottom:12px}
-.payment-box p{font-size:13px;color:#a1a1aa;line-height:1.5}
+/* Settings page */
+.settings-section{margin-bottom:24px}
+.settings-section h3{font-size:13px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;font-weight:600}
 </style>
 </head>
 <body>
 
-<!-- ====== LOGIN / REGISTER ====== -->
+<!-- ========== AUTH ========== -->
 <div id="auth" class="page auth-box active">
   <div class="auth-card">
+    <div class="logo">✦</div>
     <h1>AI Assistant</h1>
-    <p class="subtitle">Your personal AI, always on.</p>
-    <div id="error" class="error"></div>
+    <p class="sub">Your personal AI, always on.</p>
+    <div id="auth-error" class="error-msg"></div>
     <form id="auth-form">
-      <div id="name-group" class="input-group hidden">
-        <label>Full name</label>
-        <input id="reg-name" type="text" placeholder="Your name">
+      <div id="name-group" class="field hidden">
+        <label>Full Name</label>
+        <input id="reg-name" type="text" placeholder="Jane Smith" autocomplete="name">
       </div>
-      <div class="input-group">
-        <label>Email address</label>
-        <input id="reg-email" type="email" placeholder="you@example.com" required>
+      <div class="field">
+        <label>Email</label>
+        <input id="reg-email" type="email" placeholder="you@example.com" required autocomplete="email">
       </div>
-      <div class="input-group">
+      <div class="field">
         <label>Password</label>
-        <input id="reg-password" type="password" placeholder="Min 6 characters" required minlength="6">
+        <input id="reg-password" type="password" placeholder="At least 6 characters" required minlength="6" autocomplete="current-password">
       </div>
       <button id="submit-btn" type="submit" class="btn btn-primary">Sign In</button>
     </form>
     <p class="toggle-text">
       <span id="toggle-label">Don't have an account?</span>
-      <a id="toggle-link" class="link" href="#">Create one</a>
+      <a id="toggle-link" class="link">Create one</a>
     </p>
   </div>
 </div>
 
-<!-- ====== ONBOARDING ====== -->
+<!-- ========== ONBOARDING ========== -->
 <div id="onboarding" class="page">
   <div class="onboard-card">
     <div class="steps">
@@ -119,106 +172,320 @@ body{background:#09090b;color:#fafafa;font-family:system-ui,-apple-system,sans-s
       <div id="step2-dot" class="step-dot"></div>
       <div id="step3-dot" class="step-dot"></div>
     </div>
-    <div id="step-label" class="step-label">Step 1/3 — WhatsApp Setup</div>
+    <div id="step-label" class="step-label">Step 1 of 3 · WhatsApp</div>
 
-    <!-- Step 1: WhatsApp -->
     <div id="step1-content">
-      <h2 style="font-size:18px;margin-bottom:8px">📱 Connect WhatsApp</h2>
-      <p style="font-size:13px;color:#71717a;margin-bottom:16px">Enter the phone number you want your AI assistant to use. This is how your assistant talks to you.</p>
-      <div class="input-group">
+      <div class="step-title">📱 Connect WhatsApp</div>
+      <p class="step-desc">This is how your AI assistant reaches you. Enter the phone number you'd like it to use.</p>
+      <div class="field">
         <label>WhatsApp phone number</label>
         <input id="onboard-whatsapp" type="text" placeholder="+1 212 555 7890">
       </div>
-      <button class="btn btn-primary" onclick="onboardSaveWhatsApp()" style="margin-top:8px">Continue →</button>
+      <button class="btn btn-primary" onclick="onboardSaveWhatsApp()" style="margin-top:6px">Continue</button>
       <button class="btn btn-outline" onclick="onboardSkip()" style="margin-top:8px">Skip for now</button>
     </div>
 
-    <!-- Step 2: Plan -->
     <div id="step2-content" class="hidden">
-      <h2 style="font-size:18px;margin-bottom:8px">💎 Choose Your Plan</h2>
-      <p style="font-size:13px;color:#71717a;margin-bottom:16px">All plans start with a 14-day free trial. No charge until trial ends.</p>
+      <div class="step-title">💎 Choose Your Plan</div>
+      <p class="step-desc">All plans include a 14-day free trial. You won't be charged until the trial ends.</p>
       <div class="plans">
         <div class="plan-card selected" data-plan="starter" onclick="selectPlan('starter')">
           <div class="plan-name">🚀 Starter</div>
-          <div class="plan-price">$49<span>/month</span></div>
-          <div class="plan-features">✓ WhatsApp AI assistant<br>✓ Email management<br>✓ Basic scheduling</div>
+          <div class="plan-price">$49<span>/mo</span></div>
+          <div class="plan-feat">WhatsApp AI · Email · Scheduling</div>
         </div>
         <div class="plan-card" data-plan="pro" onclick="selectPlan('pro')">
           <div class="plan-name">⭐ Pro</div>
-          <div class="plan-price">$149<span>/month</span></div>
-          <div class="plan-features">✓ Everything in Starter<br>✓ Calendar integration<br>✓ Advanced research<br>✓ Priority support</div>
+          <div class="plan-price">$149<span>/mo</span></div>
+          <div class="plan-feat">Everything in Starter · Calendar · Research · Priority support</div>
         </div>
         <div class="plan-card" data-plan="enterprise" onclick="selectPlan('enterprise')">
           <div class="plan-name">🏢 Enterprise</div>
-          <div class="plan-price">$499<span>/month</span></div>
-          <div class="plan-features">✓ Everything in Pro<br>✓ Multiple assistants<br>✓ Custom integrations<br>✓ Dedicated account manager</div>
+          <div class="plan-price">$499<span>/mo</span></div>
+          <div class="plan-feat">Everything in Pro · Multiple assistants · Custom integrations · Dedicated manager</div>
         </div>
       </div>
-      <button class="btn btn-primary" onclick="onboardSelectPlan()">Continue →</button>
+      <button class="btn btn-primary" onclick="onboardSelectPlan()">Continue</button>
     </div>
 
-    <!-- Step 3: Payment -->
     <div id="step3-content" class="hidden">
-      <h2 style="font-size:18px;margin-bottom:8px">💳 Secure Payment</h2>
-      <p style="font-size:13px;color:#71717a;margin-bottom:16px">Your card won't be charged until the 14-day trial ends.</p>
-      <div class="payment-box">
+      <div class="step-title">💳 Secure Payment</div>
+      <p class="step-desc">Set up billing to activate your account after the trial.</p>
+      <div class="payment-placeholder">
         <div class="icon">🔒</div>
-        <p style="font-weight:600;margin-bottom:4px" id="payment-plan-name">Starter Plan · $49/mo</p>
-        <p>Stripe payment coming soon.<br>You're on a 14-day free trial — no card needed right now.</p>
-        <p style="margin-top:12px;font-size:11px;color:#555">Cancel anytime. No questions asked.</p>
+        <p style="font-weight:600;margin-bottom:4px" id="payment-plan-name">Starter · $49/mo</p>
+        <p>Stripe checkout coming soon.<br>You're on a free trial — no card needed right now.</p>
+        <p style="margin-top:10px;font-size:11px;color:var(--text-tertiary)">Cancel anytime. No questions asked.</p>
       </div>
-      <button class="btn btn-primary" onclick="onboardStartTrial()">Start Free Trial →</button>
-      <button class="btn btn-outline" onclick="onboardSkip()" style="margin-top:8px">Skip payment for now</button>
+      <button class="btn btn-primary" onclick="onboardFinish()">Start Free Trial</button>
+      <button class="btn btn-outline" onclick="onboardFinish()" style="margin-top:8px">Skip for now</button>
     </div>
   </div>
 </div>
 
-<!-- ====== DASHBOARD ====== -->
-<div id="dashboard" class="page container">
-  <div class="nav">
-    <h2>AI Assistant</h2>
-    <div style="text-align:right">
-      <div id="user-name" class="user-name"></div>
-      <div id="user-plan" class="user-plan"></div>
-    </div>
-  </div>
-  <div class="status-card">
-    <h3>Assistant Status</h3>
-    <div class="status-row">
-      <span class="status-label">Gateway</span>
-      <span id="gateway-status" class="status-value pending">Pending</span>
-    </div>
-    <div class="status-row">
-      <span class="status-label">WhatsApp</span>
-      <span id="whatsapp-display" class="status-value offline">Not configured</span>
-      <button id="edit-whatsapp-btn" class="btn-outline" style="width:auto;padding:4px 10px;font-size:11px" onclick="showWhatsAppEdit()">Edit</button>
-    </div>
-    <div id="whatsapp-editor" class="hidden" style="margin-top:8px">
-      <input id="whatsapp-input" type="text" placeholder="+1 555 123 4567" style="width:100%;padding:10px;border-radius:8px;border:1px solid #3f3f46;background:#09090b;color:#fff;font-size:13px;margin-bottom:6px">
-      <div style="display:flex;gap:6px">
-        <button class="btn" style="width:auto;padding:8px 16px;font-size:12px;background:#fafafa;color:#09090b;border:none;border-radius:8px" onclick="saveWhatsApp()">Save</button>
-        <button class="btn btn-outline" style="width:auto;padding:8px 16px;font-size:12px" onclick="document.getElementById('whatsapp-editor').classList.add('hidden')">Cancel</button>
+<!-- ========== MAIN APP ========== -->
+<div id="app" class="page">
+  <div class="app-wrap">
+    <div class="header">
+      <div class="header-left">
+        <div class="header-logo">AI Assistant</div>
+        <div class="header-sub" id="header-email"></div>
       </div>
-      <div id="whatsapp-msg" class="msg"></div>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="showPage('settings')" title="Settings">⚙</button>
+      </div>
     </div>
-    <div class="status-row" style="border-bottom:none">
-      <span class="status-label">Plan</span>
-      <span id="plan-display" class="status-value online">Starter · Trial</span>
+
+    <!-- Dashboard -->
+    <div id="page-dashboard" class="content active-page">
+      <div class="card">
+        <div class="card-header"><h3>Assistant Status</h3></div>
+        <div class="row">
+          <span class="row-label">Status</span>
+          <span id="dash-status" class="badge badge-pending">Pending</span>
+        </div>
+        <div class="row">
+          <span class="row-label">WhatsApp</span>
+          <span id="dash-whatsapp" class="row-value" style="color:var(--text-tertiary)">Not configured</span>
+        </div>
+        <div class="row" style="border-bottom:none">
+          <span class="row-label">Plan</span>
+          <span id="dash-plan" class="row-value">Starter</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Quick Setup</div>
+        <div class="card-subtitle">Get your assistant ready in minutes</div>
+        <button class="btn btn-outline" onclick="switchTab('services')" style="margin-bottom:6px">📱 Add WhatsApp Number</button>
+        <button class="btn btn-outline" onclick="switchTab('services')" style="margin-bottom:6px">📧 Connect Your Email</button>
+        <button class="btn btn-outline" onclick="switchTab('assistant')">🎭 Customize Personality</button>
+      </div>
+    </div>
+
+    <!-- Services -->
+    <div id="page-services" class="content hidden">
+      <div class="section-title">Connections</div>
+
+      <div class="card">
+        <div class="card-header"><h3>WhatsApp</h3></div>
+        <div class="row">
+          <span class="row-label">Phone Number</span>
+          <span id="svc-whatsapp" class="row-value" style="color:var(--text-tertiary)">Not configured</span>
+        </div>
+        <div class="row" style="border-bottom:none">
+          <span class="row-label">Gateway</span>
+          <span id="svc-gateway" class="badge badge-pending">Pending</span>
+        </div>
+        <div style="margin-top:12px">
+          <input id="svc-whatsapp-input" type="text" placeholder="+1 555 123 4567" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border-hover);background:var(--bg);color:var(--text);font-size:13px;margin-bottom:8px">
+          <button class="btn btn-primary" onclick="saveWhatsAppService()">Save WhatsApp</button>
+          <div id="svc-whatsapp-msg" class="success-msg"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Email Accounts</h3><button class="btn btn-sm btn-outline" onclick="showAddEmail()">+ Add</button></div>
+        <div id="email-list">
+          <div class="empty-state"><div class="empty-icon">📧</div><p>No email accounts connected</p></div>
+        </div>
+        <div id="add-email-form" class="hidden" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+          <div class="field">
+            <label>Email Provider</label>
+            <select id="email-type">
+              <option value="gmail">Gmail</option>
+              <option value="outlook">Outlook / Office 365</option>
+              <option value="yahoo">Yahoo</option>
+              <option value="other">Other IMAP</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Email Address</label>
+            <input id="email-address" type="email" placeholder="you@gmail.com">
+          </div>
+          <div class="field">
+            <label>App Password</label>
+            <input id="email-password" type="password" placeholder="Google App Password">
+            <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">Use an app-specific password, not your regular password.</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="addEmail()" style="flex:1">Connect Email</button>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('add-email-form').classList.add('hidden')">Cancel</button>
+          </div>
+          <div id="email-msg" class="success-msg"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Calendar</h3></div>
+        <div class="empty-state">
+          <div class="empty-icon">📅</div>
+          <p>Calendar integration coming in the next update. Your assistant will be able to manage your schedule automatically.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assistant -->
+    <div id="page-assistant" class="content hidden">
+      <div class="section-title">Assistant Settings</div>
+
+      <div class="card">
+        <div class="card-header"><h3>Personality</h3></div>
+        <div class="card-subtitle">Define how your assistant speaks and behaves</div>
+        <div class="field">
+          <textarea id="personality-text" rows="5" placeholder="You are a helpful, professional AI assistant. You respond concisely and always put the user first."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="savePersonality()">Save Personality</button>
+        <div id="personality-msg" class="success-msg"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Skills</h3></div>
+        <div class="card-subtitle">Enable or disable assistant capabilities</div>
+        <div id="skills-list">
+          <div class="skill-toggle" onclick="this.querySelector('.toggle-switch').classList.toggle('on')">
+            <div class="skill-info"><div class="skill-name">📧 Email</div><div class="skill-desc">Read, send, and manage your email</div></div>
+            <div class="toggle-switch on"></div>
+          </div>
+          <div class="skill-toggle" onclick="this.querySelector('.toggle-switch').classList.toggle('on')">
+            <div class="skill-info"><div class="skill-name">📅 Calendar</div><div class="skill-desc">Schedule meetings and manage events</div></div>
+            <div class="toggle-switch on"></div>
+          </div>
+          <div class="skill-toggle" onclick="this.querySelector('.toggle-switch').classList.toggle('on')">
+            <div class="skill-info"><div class="skill-name">🌐 Web Search</div><div class="skill-desc">Search the web for information</div></div>
+            <div class="toggle-switch on"></div>
+          </div>
+          <div class="skill-toggle" onclick="this.querySelector('.toggle-switch').classList.toggle('on')">
+            <div class="skill-info"><div class="skill-name">📊 Research</div><div class="skill-desc">In-depth research and report generation</div></div>
+            <div class="toggle-switch on"></div>
+          </div>
+          <div class="skill-toggle" onclick="this.querySelector('.toggle-switch').classList.toggle('on')">
+            <div class="skill-info"><div class="skill-name">🔔 Reminders</div><div class="skill-desc">Set and manage reminders for you</div></div>
+            <div class="toggle-switch on"></div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="saveSkills()" style="margin-top:12px">Save Skills</button>
+        <div id="skills-msg" class="success-msg"></div>
+      </div>
+    </div>
+
+    <!-- Billing -->
+    <div id="page-billing" class="content hidden">
+      <div class="section-title">Billing</div>
+
+      <div class="card">
+        <div class="plan-hero">
+          <div class="current-plan" id="billing-plan">Starter</div>
+          <div class="price" id="billing-price">$49<span>/mo</span></div>
+          <span id="billing-status" class="badge badge-trial status-badge">Free Trial</span>
+        </div>
+        <div class="row">
+          <span class="row-label">Billing Period</span>
+          <span id="billing-period" class="row-value">Trial ends soon</span>
+        </div>
+        <div class="row">
+          <span class="row-label">Payment Method</span>
+          <span class="row-value" style="color:var(--text-tertiary)">Not added</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Upgrade Plan</div>
+        <div class="upgrade-options" id="upgrade-options"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Billing History</div>
+        <div class="empty-state">
+          <div class="empty-icon">📄</div>
+          <p>No invoices yet. Your first invoice will appear after the trial.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div id="page-settings" class="content hidden">
+      <div class="section-title">Account Settings</div>
+
+      <div class="card">
+        <div class="card-header"><h3>Profile</h3></div>
+        <div class="field">
+          <label>Name</label>
+          <input id="settings-name" type="text" placeholder="Your name">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input id="settings-email" type="email" placeholder="you@example.com" disabled style="opacity:.5">
+        </div>
+        <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+        <div id="profile-msg" class="success-msg"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Password</h3></div>
+        <div class="field">
+          <label>Current Password</label>
+          <input id="settings-current-pw" type="password" placeholder="Current password">
+        </div>
+        <div class="field">
+          <label>New Password</label>
+          <input id="settings-new-pw" type="password" placeholder="At least 6 characters">
+        </div>
+        <button class="btn btn-primary" onclick="changePassword()">Change Password</button>
+        <div id="password-msg" class="success-msg"></div>
+      </div>
+
+      <button class="btn btn-danger" onclick="logout()" style="margin-top:20px">Sign Out</button>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav" id="bottom-nav">
+      <button class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+        <span class="nav-icon">🏠</span> Home
+      </button>
+      <button class="nav-item" data-tab="services" onclick="switchTab('services')">
+        <span class="nav-icon">🔌</span> Services
+      </button>
+      <button class="nav-item" data-tab="assistant" onclick="switchTab('assistant')">
+        <span class="nav-icon">🤖</span> Assistant
+      </button>
+      <button class="nav-item" data-tab="billing" onclick="switchTab('billing')">
+        <span class="nav-icon">💳</span> Billing
+      </button>
     </div>
   </div>
-  <div style="margin-top:24px">
-    <h3 style="font-size:14px;margin-bottom:12px">Quick Actions</h3>
-    <button class="action-btn" onclick="alert('Coming soon')">📧 Connect Email →</button>
-    <button class="action-btn" onclick="alert('Coming soon')">📅 Connect Calendar →</button>
-    <button class="action-btn" onclick="alert('Coming soon')">🎭 Customize Personality →</button>
-  </div>
-  <button id="logout-btn" class="btn btn-danger" style="margin-top:32px">Sign Out</button>
 </div>
 
 <script>
+// ===== CONFIG =====
 const API = location.hostname === 'localhost' ? 'http://localhost:8000' : 'http://' + location.hostname + ':8000';
+let currentUser = null;
+let currentProfile = null;
 
-// ====== AUTH ======
+// ===== HELPERS =====
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function msg(elId, text, isGood) {
+  const el = document.getElementById(elId);
+  el.textContent = text; el.style.color = isGood ? 'var(--green)' : 'var(--red)';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+async function api(method, path, body) {
+  const headers = {'Content-Type':'application/json'};
+  const token = localStorage.getItem('token');
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  const opts = {method, headers};
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || 'Request failed');
+  return data;
+}
+
+// ===== AUTH =====
 let isRegister = false;
 document.getElementById('toggle-link').onclick = e => {
   e.preventDefault();
@@ -227,7 +494,7 @@ document.getElementById('toggle-link').onclick = e => {
   document.getElementById('submit-btn').textContent = isRegister ? 'Create Account' : 'Sign In';
   document.getElementById('toggle-label').textContent = isRegister ? 'Already have an account?' : "Don't have an account?";
   e.target.textContent = isRegister ? 'Sign in' : 'Create one';
-  hideError();
+  document.getElementById('auth-error').classList.remove('show');
 };
 
 document.getElementById('auth-form').onsubmit = async function(e) {
@@ -235,132 +502,262 @@ document.getElementById('auth-form').onsubmit = async function(e) {
   const email = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-password').value;
   const name = document.getElementById('reg-name').value.trim();
-  if (!email || !password) return showError('Please fill in all fields');
-  if (isRegister && !name) return showError('Please enter your name');
-
+  if (!email || !password) return;
+  if (isRegister && !name) {
+    document.getElementById('auth-error').textContent = 'Please enter your name';
+    document.getElementById('auth-error').classList.add('show');
+    return;
+  }
   const btn = document.getElementById('submit-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Please wait...';
-
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Please wait...';
   try {
     const endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
-    const body = isRegister ? { email, password, name } : { email, password };
-    const res = await fetch(API + endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    const body = isRegister ? {email, password, name} : {email, password};
+    const res = await fetch(API + endpoint, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Request failed');
     localStorage.setItem('token', data.access_token);
     localStorage.setItem('user', JSON.stringify(data.user));
-    if (isRegister) showOnboarding();
-    else showDashboard(data.user);
-  } catch (err) {
-    showError(err.message);
+    currentUser = data.user;
+    if (isRegister) startOnboarding();
+    else enterApp(data.user);
+  } catch(err) {
+    document.getElementById('auth-error').textContent = err.message;
+    document.getElementById('auth-error').classList.add('show');
     btn.disabled = false;
     btn.textContent = isRegister ? 'Create Account' : 'Sign In';
   }
 };
 
-// ====== ONBOARDING ======
+// ===== ONBOARDING =====
 let onboardPlan = 'starter';
 let onboardStep = 0;
-
-function showOnboarding() {
+function startOnboarding() { onboardStep = 0; onboardPlan = 'starter'; updateOnboardUI(); }
+function updateOnboardUI() {
   showPage('onboarding');
-  onboardStep = 0;
-  onboardPlan = 'starter';
-  updateStepUI();
-}
-
-function updateStepUI() {
   ['step1','step2','step3'].forEach((s,i) => {
     document.getElementById(s+'-dot').className = 'step-dot ' + (i < onboardStep ? 'done' : i === onboardStep ? 'current' : '');
     document.getElementById(s+'-content').classList.toggle('hidden', i !== onboardStep);
   });
-  const labels = ['Step 1/3 — WhatsApp Setup','Step 2/3 — Choose Plan','Step 3/3 — Payment'];
-  document.getElementById('step-label').textContent = labels[onboardStep];
+  document.getElementById('step-label').textContent = ['Step 1 of 3 · WhatsApp','Step 2 of 3 · Plan','Step 3 of 3 · Payment'][onboardStep];
 }
-
 function onboardSaveWhatsApp() {
   const num = document.getElementById('onboard-whatsapp').value.trim();
-  if (num) {
-    fetch(API + '/api/profiles/me/whatsapp', {
-      method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('token')},
-      body:JSON.stringify({whatsapp_number:num})
-    }).catch(() => {});
-  }
-  onboardStep = 1; updateStepUI();
+  if (num) api('PUT','/api/profiles/me/whatsapp',{whatsapp_number:num}).catch(()=>{});
+  onboardStep = 1; updateOnboardUI();
 }
-
-function onboardSkip() {
-  onboardStep++;
-  if (onboardStep >= 3) onboardFinish();
-  else updateStepUI();
-}
-
+function onboardSkip() { onboardStep++; if (onboardStep >= 3) onboardFinish(); else updateOnboardUI(); }
 function selectPlan(plan) {
   onboardPlan = plan;
   document.querySelectorAll('.plan-card').forEach(c => c.classList.toggle('selected', c.dataset.plan === plan));
 }
-
 function onboardSelectPlan() {
-  // Save plan to backend
-  fetch(API + '/api/profiles/me/plan', {
-    method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('token')},
-    body:JSON.stringify({plan:onboardPlan})
-  }).catch(() => {});
-  document.getElementById('payment-plan-name').textContent = 
-    onboardPlan === 'starter' ? 'Starter Plan · $49/mo' : 
-    onboardPlan === 'pro' ? 'Pro Plan · $149/mo' : 'Enterprise Plan · $499/mo';
-  onboardStep = 2; updateStepUI();
+  api('PUT','/api/profiles/me/plan',{plan:onboardPlan}).catch(()=>{});
+  const names = {starter:'Starter · $49/mo',pro:'Pro · $149/mo',enterprise:'Enterprise · $499/mo'};
+  document.getElementById('payment-plan-name').textContent = names[onboardPlan];
+  onboardStep = 2; updateOnboardUI();
 }
-
-function onboardStartTrial() { onboardFinish(); }
-
 function onboardFinish() {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  showDashboard(user);
+  const user = JSON.parse(localStorage.getItem('user')||'{}');
+  enterApp(user);
 }
 
-// ====== DASHBOARD ======
-function showDashboard(user) {
-  showPage('dashboard');
-  document.getElementById('user-name').textContent = user.name || '';
-  document.getElementById('user-plan').textContent = 'Starter · Trial';
-  
-  fetch(API + '/api/profiles/me', {
-    headers:{'Authorization':'Bearer '+localStorage.getItem('token')}
-  }).then(r => r.json()).then(p => {
-    if (p.gateway_status) { document.getElementById('gateway-status').textContent = p.gateway_status; document.getElementById('gateway-status').className = 'status-value '+p.gateway_status; }
-    if (p.whatsapp_number) { document.getElementById('whatsapp-display').textContent = p.whatsapp_number; document.getElementById('whatsapp-display').className = 'status-value online'; document.getElementById('whatsapp-input').value = p.whatsapp_number; }
-    if (p.plan) { document.getElementById('plan-display').textContent = p.plan+' · Trial'; }
-    document.getElementById('gateway-status').textContent = p.gateway_status || 'pending';
-    document.getElementById('gateway-status').className = 'status-value ' + (p.gateway_status || 'pending');
-  }).catch(() => {});
+// ===== ENTER APP =====
+async function enterApp(user) {
+  currentUser = user;
+  showPage('app');
+  document.getElementById('header-email').textContent = user.email || '';
+  document.getElementById('settings-email').value = user.email || '';
+  document.getElementById('settings-name').value = user.name || '';
+
+  // Load profile
+  try { currentProfile = await api('GET','/api/profiles/me'); } catch(e) { currentProfile = null; }
+  refreshDashboard();
+  refreshServices();
+  refreshAssistant();
+  refreshBilling();
+  switchTab('dashboard');
 }
 
-function showWhatsAppEdit() { document.getElementById('whatsapp-editor').classList.remove('hidden'); }
-async function saveWhatsApp() {
-  const number = document.getElementById('whatsapp-input').value.trim();
-  if (!number) return;
-  const msg = document.getElementById('whatsapp-msg');
-  try {
-    const res = await fetch(API + '/api/profiles/me/whatsapp', {
-      method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('token')},
-      body:JSON.stringify({whatsapp_number:number})
-    });
-    if (!res.ok) throw new Error('Failed');
-    document.getElementById('whatsapp-display').textContent = number;
-    document.getElementById('whatsapp-display').className = 'status-value online';
-    msg.textContent = '✓ Saved!'; msg.style.color='#22c55e'; msg.classList.add('show');
-    setTimeout(() => { msg.classList.remove('show'); document.getElementById('whatsapp-editor').classList.add('hidden'); }, 1500);
-  } catch(e) {
-    msg.textContent = e.message; msg.style.color='#f87171'; msg.classList.add('show');
+// ===== TAB NAVIGATION =====
+function showTabContent(id) {
+  document.querySelectorAll('#app .content').forEach(c => c.classList.add('hidden'));
+  const el = document.getElementById('page-'+id);
+  if (el) el.classList.remove('hidden');
+}
+function switchTab(tab) {
+  showTabContent(tab);
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab === tab));
+  if (tab === 'dashboard') refreshDashboard();
+  if (tab === 'services') refreshServices();
+  if (tab === 'assistant') refreshAssistant();
+  if (tab === 'billing') refreshBilling();
+}
+
+// ===== DASHBOARD =====
+function refreshDashboard() {
+  if (!currentProfile) return;
+  const s = currentProfile.gateway_status || 'pending';
+  document.getElementById('dash-status').textContent = s.charAt(0).toUpperCase()+s.slice(1);
+  document.getElementById('dash-status').className = 'badge badge-' + (s==='online'?'online':s==='pending'?'pending':'offline');
+  document.getElementById('dash-whatsapp').textContent = currentProfile.whatsapp_number || 'Not configured';
+  document.getElementById('dash-whatsapp').style.color = currentProfile.whatsapp_number ? 'var(--text)' : 'var(--text-tertiary)';
+  document.getElementById('dash-plan').textContent = (currentProfile.plan||'Starter').charAt(0).toUpperCase()+(currentProfile.plan||'Starter').slice(1) + ' · Trial';
+}
+
+// ===== SERVICES =====
+function refreshServices() {
+  if (!currentProfile) return;
+  document.getElementById('svc-whatsapp').textContent = currentProfile.whatsapp_number || 'Not configured';
+  document.getElementById('svc-whatsapp').style.color = currentProfile.whatsapp_number ? 'var(--text)' : 'var(--text-tertiary)';
+  document.getElementById('svc-whatsapp-input').value = currentProfile.whatsapp_number || '';
+  const gw = currentProfile.gateway_status || 'pending';
+  document.getElementById('svc-gateway').textContent = gw.charAt(0).toUpperCase()+gw.slice(1);
+  document.getElementById('svc-gateway').className = 'badge badge-' + (gw==='online'?'online':gw==='pending'?'pending':'offline');
+
+  // Email list
+  const list = document.getElementById('email-list');
+  const emails = currentProfile.email_accounts || [];
+  if (emails.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📧</div><p>No email accounts connected</p></div>';
+  } else {
+    list.innerHTML = emails.map((e,i) => `
+      <div class="email-item">
+        <div><div class="email-addr">${e.email}</div><div class="email-type">${e.type}</div></div>
+        <button class="remove-btn" onclick="removeEmail(${i})">✕</button>
+      </div>`).join('');
   }
 }
 
-// Logout
-document.getElementById('logout-btn').onclick = () => {
+async function saveWhatsAppService() {
+  const num = document.getElementById('svc-whatsapp-input').value.trim();
+  if (!num) return msg('svc-whatsapp-msg','Please enter a phone number',false);
+  try {
+    await api('PUT','/api/profiles/me/whatsapp',{whatsapp_number:num});
+    currentProfile.whatsapp_number = num;
+    currentProfile.gateway_status = 'pending';
+    refreshServices();
+    refreshDashboard();
+    msg('svc-whatsapp-msg','✓ WhatsApp number saved',true);
+  } catch(e) { msg('svc-whatsapp-msg',e.message,false); }
+}
+
+function showAddEmail() { document.getElementById('add-email-form').classList.remove('hidden'); }
+async function addEmail() {
+  const type = document.getElementById('email-type').value;
+  const email = document.getElementById('email-address').value.trim();
+  const password = document.getElementById('email-password').value.trim();
+  if (!email || !password) return msg('email-msg','Please fill all fields',false);
+  try {
+    await api('POST','/api/profiles/me/email',{email_type:type,email_address:email,app_password:password});
+    if (!currentProfile.email_accounts) currentProfile.email_accounts = [];
+    currentProfile.email_accounts.push({type,email});
+    document.getElementById('add-email-form').classList.add('hidden');
+    document.getElementById('email-address').value = '';
+    document.getElementById('email-password').value = '';
+    refreshServices();
+    msg('email-msg','✓ Email connected',true);
+  } catch(e) { msg('email-msg',e.message,false); }
+}
+
+async function removeEmail(index) {
+  try {
+    await api('DELETE','/api/profiles/me/email/'+index);
+    currentProfile.email_accounts.splice(index,1);
+    refreshServices();
+  } catch(e) { alert('Failed to remove email'); }
+}
+
+// ===== ASSISTANT =====
+function refreshAssistant() {
+  if (!currentProfile) return;
+  document.getElementById('personality-text').value = currentProfile.personality || 'You are a helpful AI assistant.';
+  // Skills would sync here
+}
+async function savePersonality() {
+  const text = document.getElementById('personality-text').value.trim();
+  if (!text) return msg('personality-msg','Personality cannot be empty',false);
+  try {
+    await api('PUT','/api/profiles/me/personality',{personality:text});
+    currentProfile.personality = text;
+    msg('personality-msg','✓ Personality saved',true);
+  } catch(e) { msg('personality-msg',e.message,false); }
+}
+async function saveSkills() {
+  const skills = [];
+  document.querySelectorAll('#skills-list .skill-toggle').forEach(el => {
+    const name = el.querySelector('.skill-name').textContent.trim();
+    const on = el.querySelector('.toggle-switch').classList.contains('on');
+    if (on) skills.push(name);
+  });
+  try {
+    await api('PUT','/api/profiles/me/skills',{skills});
+    msg('skills-msg','✓ Skills saved',true);
+  } catch(e) { msg('skills-msg',e.message,false); }
+}
+
+// ===== BILLING =====
+async function refreshBilling() {
+  try {
+    const sub = await api('GET','/api/billing/subscription');
+    const planNames = {starter:'Starter',pro:'Pro',enterprise:'Enterprise'};
+    const planPrices = {starter:'$49',pro:'$149',enterprise:'$499'};
+    document.getElementById('billing-plan').textContent = planNames[sub.plan] || 'Starter';
+    document.getElementById('billing-price').innerHTML = (planPrices[sub.plan]||'$49')+'<span>/mo</span>';
+    document.getElementById('billing-status').textContent = sub.status === 'trialing' ? 'Free Trial' : sub.status;
+    document.getElementById('billing-status').className = 'badge '+(sub.status==='trialing'?'badge-trial':'badge-active')+' status-badge';
+    document.getElementById('billing-period').textContent = sub.period_end || 'Trial ends soon';
+
+    // Upgrade options
+    const current = sub.plan;
+    const options = [
+      {plan:'starter',name:'🚀 Starter',price:'$49/mo',feat:'WhatsApp AI · Email · Scheduling'},
+      {plan:'pro',name:'⭐ Pro',price:'$149/mo',feat:'Everything in Starter · Calendar · Research · Priority support'},
+      {plan:'enterprise',name:'🏢 Enterprise',price:'$499/mo',feat:'Everything in Pro · Multiple assistants · Custom integrations'},
+    ];
+    document.getElementById('upgrade-options').innerHTML = options
+      .filter(o => o.plan !== current)
+      .map(o => `<button class="btn btn-outline" style="text-align:left;padding:14px" onclick="upgradePlan('${o.plan}')">
+        <span style="font-weight:600">${o.name}</span>
+        <span style="float:right;color:var(--text-secondary)">${o.price}</span>
+      </button>`).join('');
+  } catch(e) { /* billing not available */ }
+}
+async function upgradePlan(plan) {
+  try {
+    await api('PUT','/api/profiles/me/plan',{plan});
+    refreshBilling();
+    msg('billing-msg','Plan updated!',true);
+  } catch(e) { alert('Failed: '+e.message); }
+}
+
+// ===== SETTINGS =====
+async function saveProfile() {
+  try {
+    await api('PUT','/api/auth/me',{name:document.getElementById('settings-name').value.trim()});
+    currentUser.name = document.getElementById('settings-name').value.trim();
+    localStorage.setItem('user',JSON.stringify(currentUser));
+    msg('profile-msg','✓ Profile updated',true);
+  } catch(e) { msg('profile-msg',e.message,false); }
+}
+async function changePassword() {
+  const current = document.getElementById('settings-current-pw').value;
+  const newPw = document.getElementById('settings-new-pw').value;
+  if (!current||!newPw) return msg('password-msg','Please fill all fields',false);
+  if (newPw.length < 6) return msg('password-msg','Password must be at least 6 characters',false);
+  try {
+    await api('PUT','/api/auth/me/password',{current_password:current,new_password:newPw});
+    document.getElementById('settings-current-pw').value = '';
+    document.getElementById('settings-new-pw').value = '';
+    msg('password-msg','✓ Password changed',true);
+  } catch(e) { msg('password-msg',e.message,false); }
+}
+
+// ===== LOGOUT =====
+function logout() {
   localStorage.clear();
-  showPage('auth');
+  currentUser = null;
+  currentProfile = null;
   document.getElementById('reg-email').value = '';
   document.getElementById('reg-password').value = '';
   isRegister = false;
@@ -368,20 +765,15 @@ document.getElementById('logout-btn').onclick = () => {
   document.getElementById('submit-btn').textContent = 'Sign In';
   document.getElementById('toggle-label').textContent = "Don't have an account?";
   document.getElementById('toggle-link').textContent = 'Create one';
-};
-
-// ====== HELPERS ======
-function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-function showError(msg) { const el = document.getElementById('error'); el.textContent = msg; el.classList.add('show'); }
-function hideError() { document.getElementById('error').classList.remove('show'); }
+  showPage('auth');
+}
 
 // Auto-login
-(function() {
+(function(){
   const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const user = JSON.parse(localStorage.getItem('user')||'null');
   if (token && user) {
-    fetch(API + '/api/auth/me', { headers:{'Authorization':'Bearer '+token} })
-      .then(r => r.ok ? showDashboard(user) : localStorage.clear());
+    api('GET','/api/auth/me').then(u => enterApp(u)).catch(()=>{localStorage.clear()});
   }
 })();
 </script>

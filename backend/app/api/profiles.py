@@ -126,6 +126,27 @@ async def update_whatsapp(
     return {"status": "ok", "whatsapp_number": whatsapp_number}
 
 
+@router.delete("/me/email/{index}")
+async def remove_email(
+    index: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(HermesProfile).where(HermesProfile.user_id == user.id)
+    )
+    profile = result.scalar_one_or_none()
+    if not profile:
+        raise HTTPException(status_code=404, detail="No profile yet")
+    accounts = list(profile.email_accounts or [])
+    if index < 0 or index >= len(accounts):
+        raise HTTPException(status_code=400, detail="Invalid email index")
+    accounts.pop(index)
+    profile.email_accounts = accounts
+    await db.commit()
+    return {"status": "ok", "accounts": len(accounts)}
+
+
 @router.put("/me/skills")
 async def update_skills(
     req: UpdateSkillsRequest,

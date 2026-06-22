@@ -83,3 +83,38 @@ async def me(user: User = Depends(get_current_user)):
         "name": user.name,
         "status": user.status.value,
     }
+
+
+class UpdateProfileRequest(BaseModel):
+    name: str
+
+
+@router.put("/me")
+async def update_profile(
+    req: UpdateProfileRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    user.name = req.name
+    await db.commit()
+    return {"id": str(user.id), "email": user.email, "name": user.name}
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
+@router.put("/me/password")
+async def change_password(
+    req: ChangePasswordRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    if not verify_password(req.current_password, user.password_hash):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    if len(req.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    user.password_hash = hash_password(req.new_password)
+    await db.commit()
+    return {"status": "ok"}
